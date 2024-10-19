@@ -7,7 +7,10 @@ import (
 	"github.com/carp-cobain/tracker/database"
 	"github.com/carp-cobain/tracker/database/repo"
 	"github.com/carp-cobain/tracker/handler"
+	"github.com/carp-cobain/tracker/processor"
+
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 )
 
 func main() {
@@ -41,6 +44,12 @@ func main() {
 		v1.GET("/campaigns/:id/referrals", referralHandler.GetReferrals)
 		v1.POST("/campaigns/:id/referrals", referralHandler.CreateReferral)
 	}
+
+	// Run background processors
+	referralVerifier := processor.NewReferralVerifier(referralRepo)
+	c := cron.New()
+	c.AddFunc("@every 1m", referralVerifier.VerifyReferrals)
+	c.Start()
 
 	// Run server
 	if err := r.Run(); err != nil {
