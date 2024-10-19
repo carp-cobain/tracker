@@ -37,6 +37,7 @@ func main() {
 		v1.GET("/campaigns", campaignHandler.GetCampaigns)
 		v1.POST("/campaigns", campaignHandler.CreateCampaign)
 		v1.GET("/campaigns/:id", campaignHandler.GetCampaign)
+		v1.DELETE("/campaigns/:id", campaignHandler.ExpireCampaign)
 		v1.GET("/campaigns/:id/referrals", referralHandler.GetReferrals)
 		v1.POST("/campaigns/:id/referrals", referralHandler.CreateReferral)
 	}

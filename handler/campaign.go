@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/carp-cobain/tracker/dto"
@@ -68,4 +69,19 @@ func (self CampaignHandler) CreateCampaign(c *gin.Context) {
 		return
 	}
 	okJson(c, gin.H{"campaign": campaign})
+}
+
+// DELETE /campaigns/:id
+// ExpireCampaign marks campaigns as expired
+func (self CampaignHandler) ExpireCampaign(c *gin.Context) {
+	id, err := uintParam(c, "id")
+	if err != nil {
+		badRequestJson(c, err)
+		return
+	}
+	if err := self.campaignKeeper.ExpireCampaign(id); err != nil {
+		badRequestJson(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
 }

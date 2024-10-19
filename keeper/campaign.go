@@ -16,5 +16,6 @@ type CampaignReader interface {
 
 // CampaignWriter writes campaigns
 type CampaignWriter interface {
-	CreateCampaign(account, name string) (campaign domain.Campaign, err error)
+	CreateCampaign(account, name string) (domain.Campaign, error)
+	ExpireCampaign(id uint64) error
 }

@@ -32,3 +32,12 @@ func InsertCampaign(db *gorm.DB, account, name string) (campaign model.Campaign,
 	err = db.Create(&campaign).Error
 	return
 }
+
+// ExpireCampaign sets the expiration timestamp of a campaign.
+func ExpireCampaign(db *gorm.DB, id uint64) (err error) {
+	var campaign model.Campaign
+	if campaign, err = SelectCampaign(db, id); err == nil {
+		err = db.Model(&campaign).Updates(updates{"expires_at": model.Now()}).Error
+	}
+	return
+}

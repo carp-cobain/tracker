@@ -49,3 +49,8 @@ func (self CampaignRepo) CreateCampaign(account, name string) (campaign domain.C
 	}
 	return
 }
+
+// ExpireCampaign marks a campaign as expired.
+func (self CampaignRepo) ExpireCampaign(id uint64) error {
+	return query.ExpireCampaign(self.writeDB, id)
+}
