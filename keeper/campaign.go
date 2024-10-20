@@ -1,6 +1,10 @@
 package keeper
 
-import "github.com/carp-cobain/tracker/domain"
+import (
+	"time"
+
+	"github.com/carp-cobain/tracker/domain"
+)
 
 // CampaignKeeper manages campaigns
 type CampaignKeeper interface {
@@ -17,5 +21,5 @@ type CampaignReader interface {
 // CampaignWriter writes campaigns
 type CampaignWriter interface {
 	CreateCampaign(account, name string) (domain.Campaign, error)
-	ExpireCampaign(id uint64) error
+	UpdateCampaign(id uint64, name string, expiresAt time.Time) (domain.Campaign, error)
 }

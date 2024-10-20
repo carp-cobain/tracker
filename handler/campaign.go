@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/carp-cobain/tracker/dto"
 	"github.com/carp-cobain/tracker/keeper"
@@ -53,7 +54,7 @@ func (self CampaignHandler) GetCampaign(c *gin.Context) {
 // POST /campaigns
 // CreateCampaign creates new named campaigns
 func (self CampaignHandler) CreateCampaign(c *gin.Context) {
-	var request dto.CampaignRequest
+	var request dto.CreateCampaignRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		badRequestJson(c, err)
 		return
@@ -79,9 +80,36 @@ func (self CampaignHandler) ExpireCampaign(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	if err := self.campaignKeeper.ExpireCampaign(id); err != nil {
+	expiresAt := time.Now()
+	if _, err := self.campaignKeeper.UpdateCampaign(id, "", expiresAt); err != nil {
 		badRequestJson(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)
+}
+
+// PATCH /campaigns/:id
+// UpdateCampaign updates campaign name and/or expiration.
+func (self CampaignHandler) UpdateCampaign(c *gin.Context) {
+	id, err := uintParam(c, "id")
+	if err != nil {
+		badRequestJson(c, err)
+		return
+	}
+	var request dto.UpdateCampaignRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		badRequestJson(c, err)
+		return
+	}
+	name, expiresAt, err := request.Validate()
+	if err != nil {
+		badRequestJson(c, err)
+		return
+	}
+	campaign, err := self.campaignKeeper.UpdateCampaign(id, name, expiresAt)
+	if err != nil {
+		badRequestJson(c, err)
+		return
+	}
+	okJson(c, gin.H{"campaign": campaign})
 }

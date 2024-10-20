@@ -33,11 +33,18 @@ func InsertCampaign(db *gorm.DB, account, name string) (campaign model.Campaign,
 	return
 }
 
-// ExpireCampaign sets the expiration timestamp of a campaign.
-func ExpireCampaign(db *gorm.DB, id uint64) (err error) {
-	var campaign model.Campaign
-	if campaign, err = SelectCampaign(db, id); err == nil {
-		err = db.Model(&campaign).Updates(updates{"expires_at": model.Now()}).Error
+// UpdateCampaign sets the name and expiration timestamp of a campaign.
+func UpdateCampaign(db *gorm.DB, id uint64, name string, expiresAt model.DateTime) (model.Campaign, error) {
+	campaign, err := SelectCampaign(db, id)
+	if err != nil {
+		return campaign, err
 	}
-	return
+	if name == "" {
+		name = campaign.Name
+	}
+	if expiresAt <= 0 {
+		expiresAt = campaign.ExpiresAt
+	}
+	result := db.Model(&campaign).Updates(updates{"name": name, "expires_at": expiresAt})
+	return campaign, result.Error
 }

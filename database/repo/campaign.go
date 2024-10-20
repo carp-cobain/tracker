@@ -2,6 +2,7 @@ package repo
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/carp-cobain/tracker/database/model"
 	"github.com/carp-cobain/tracker/database/query"
@@ -50,7 +51,11 @@ func (self CampaignRepo) CreateCampaign(account, name string) (campaign domain.C
 	return
 }
 
-// ExpireCampaign marks a campaign as expired.
-func (self CampaignRepo) ExpireCampaign(id uint64) error {
-	return query.ExpireCampaign(self.writeDB, id)
+// UpdateCampaign updates campaign fields.
+func (self CampaignRepo) UpdateCampaign(id uint64, name string, expiresAt time.Time) (domain.Campaign, error) {
+	model, err := query.UpdateCampaign(self.writeDB, id, name, model.DateTime(expiresAt.Unix()))
+	if err != nil {
+		return domain.Campaign{}, err
+	}
+	return model.ToDomain(), nil
 }
