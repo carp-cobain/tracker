@@ -65,8 +65,8 @@ func (self ReferralRepo) CreateReferral(campaignID uint64, account string) (refe
 	return
 }
 
-// SetReferralStatus updates the status of a referral for a referral campaign.
-func (self ReferralRepo) SetReferralStatus(referralID uint64, status string) (referral domain.Referral, err error) {
+// UpdateReferral updates the status of a referral for a campaign.
+func (self ReferralRepo) UpdateReferral(referralID uint64, status string) (referral domain.Referral, err error) {
 	var model model.Referral
 	if model, err = query.UpdateReferralStatus(self.writeDB, referralID, status); err == nil {
 		referral = model.ToDomain()

@@ -72,7 +72,7 @@ func TestReferralRepo(t *testing.T) {
 
 	// Update (set status)
 	verified := model.ReferralStatusVerified.ToDomain()
-	updated, err := referralRepo.SetReferralStatus(referral.ID, verified)
+	updated, err := referralRepo.UpdateReferral(referral.ID, verified)
 	if err != nil {
 		t.Fatalf("failed to update referral status: %+v", err)
 	}

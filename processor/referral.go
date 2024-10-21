@@ -35,7 +35,7 @@ func (self *ReferralVerifier) VerifyReferrals() {
 func (self *ReferralVerifier) verifyReferral(referral domain.Referral) {
 	status := randStatus()
 	log.Printf("setting referral %d status to %s", referral.ID, status)
-	if _, err := self.referralKeeper.SetReferralStatus(referral.ID, status); err != nil {
+	if _, err := self.referralKeeper.UpdateReferral(referral.ID, status); err != nil {
 		log.Printf(
 			"failed to update referral %d to status %s: %s",
 			referral.ID,

@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/carp-cobain/tracker/database/model"
@@ -43,19 +42,19 @@ func (self CampaignRepo) GetCampaigns(account string, cursor uint64, limit int) 
 
 // CreateCampaign creates a new named campaign
 func (self CampaignRepo) CreateCampaign(account, name string) (campaign domain.Campaign, err error) {
-	if model, err := query.InsertCampaign(self.writeDB, account, name); err == nil {
+	var model model.Campaign
+	if model, err = query.InsertCampaign(self.writeDB, account, name); err == nil {
 		campaign = model.ToDomain()
-	} else {
-		err = fmt.Errorf("campaign: %s", err.Error())
 	}
 	return
 }
 
 // UpdateCampaign updates campaign fields.
-func (self CampaignRepo) UpdateCampaign(id uint64, name string, expiresAt time.Time) (domain.Campaign, error) {
-	model, err := query.UpdateCampaign(self.writeDB, id, name, model.DateTime(expiresAt.Unix()))
-	if err != nil {
-		return domain.Campaign{}, err
+func (self CampaignRepo) UpdateCampaign(id uint64, name string, expiresAt time.Time) (campaign domain.Campaign, err error) {
+	expiry := model.DateTime(expiresAt.Unix())
+	var model model.Campaign
+	if model, err = query.UpdateCampaign(self.writeDB, id, name, expiry); err == nil {
+		campaign = model.ToDomain()
 	}
-	return model.ToDomain(), nil
+	return
 }

@@ -17,5 +17,5 @@ type ReferralReader interface {
 // ReferralWriter writes campaign referrals
 type ReferralWriter interface {
 	CreateReferral(campaignID uint64, account string) (domain.Referral, error)
-	SetReferralStatus(referralID uint64, status string) (domain.Referral, error)
+	UpdateReferral(referralID uint64, status string) (domain.Referral, error)
 }
