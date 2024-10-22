@@ -1,13 +1,21 @@
 package processor
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
+	"time"
 
 	"github.com/carp-cobain/tracker/database/model"
 	"github.com/carp-cobain/tracker/domain"
 	"github.com/carp-cobain/tracker/keeper"
 )
+
+// processor page size
+const maxReferrals = 100
+
+// pending status
+var pendingStatus = model.ReferralStatusPending.ToDomain()
 
 // ReferralVerifier verifies that referrals have placed an order on the exchange.
 type ReferralVerifier struct {
@@ -22,9 +30,8 @@ func NewReferralVerifier(referralKeeper keeper.ReferralKeeper) ReferralVerifier 
 
 // VerifyReferrals verifies whether accounts for referrals in a "pending" status have made a trade.
 func (self *ReferralVerifier) VerifyReferrals() {
-	limit := 1000 // page size
-	pending := model.ReferralStatusPending.ToDomain()
-	cursor, referrals := self.referralKeeper.GetReferralsWithStatus(pending, self.cursor, limit)
+	log.Printf("VerifyReferrals: %s", time.Now().UTC())
+	cursor, referrals := self.referralKeeper.GetReferralsWithStatus(pendingStatus, self.cursor, maxReferrals)
 	for _, referral := range referrals {
 		self.verifyReferral(referral)
 	}
@@ -33,7 +40,7 @@ func (self *ReferralVerifier) VerifyReferrals() {
 
 // verfiy referral logic
 func (self *ReferralVerifier) verifyReferral(referral domain.Referral) {
-	status := randStatus()
+	status := getTradeStatus(referral.Account)
 	log.Printf("setting referral %d status to %s", referral.ID, status)
 	if _, err := self.referralKeeper.UpdateReferral(referral.ID, status); err != nil {
 		log.Printf(
@@ -46,7 +53,12 @@ func (self *ReferralVerifier) verifyReferral(referral domain.Referral) {
 }
 
 // return a pseudo-random referral status
-func randStatus() (status string) {
+func getTradeStatus(account string) (status string) {
+	log.Println("getting status for account: %s", account)
+	// simulate latency
+	ms, _ := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(200)))
+	time.Sleep(ms)
+	// simulate ~80% success rate
 	if rand.Float32() < 0.8 {
 		status = model.ReferralStatusVerified.ToDomain()
 	} else {

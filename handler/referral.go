@@ -14,7 +14,9 @@ type ReferralHandler struct {
 
 // NewReferralHandler creates a new referral campaign handler
 func NewReferralHandler(
-	campaignReader keeper.CampaignReader, referralKeeper keeper.ReferralKeeper) ReferralHandler {
+	campaignReader keeper.CampaignReader,
+	referralKeeper keeper.ReferralKeeper,
+) ReferralHandler {
 	return ReferralHandler{campaignReader, referralKeeper}
 }
 
@@ -31,8 +33,8 @@ func (self ReferralHandler) GetReferrals(c *gin.Context) {
 		return
 	}
 	cursor, limit := getPageParams(c)
-	next, referrals := self.referralKeeper.GetReferrals(campaignID, cursor, limit)
-	okJson(c, gin.H{"cursor": next, "referrals": referrals})
+	nextCursor, referrals := self.referralKeeper.GetReferrals(campaignID, cursor, limit)
+	okJson(c, gin.H{"cursor": nextCursor, "referrals": referrals})
 }
 
 // POST /campaigns/:id/referrals

@@ -8,14 +8,14 @@ import (
 
 // CreateCampaignRequest is the request type for creating campaigns.
 type CreateCampaignRequest struct {
-	Account string `json:"account" binding:"required,min=41,max=61"`
+	Account string `json:"account" binding:"required"`
 	Name    string `json:"name"`
 }
 
 // Validate campaign request address
 func (self CreateCampaignRequest) Validate() (string, string, error) {
-	account := strings.TrimSpace(self.Account)
-	if err := ValidateAccount(account); err != nil {
+	account, err := ValidateAccount(self.Account)
+	if err != nil {
 		return "", "", err
 	}
 	name := strings.TrimSpace(self.Name)
@@ -40,6 +40,9 @@ func (self UpdateCampaignRequest) Validate() (string, time.Time, error) {
 	expiresAt := self.ExpiresAt
 	if expiresAt.Before(time.Now()) {
 		expiresAt = time.Unix(0, 0)
+	}
+	if name == "" && expiresAt == time.Unix(0, 0) {
+		return "", expiresAt, fmt.Errorf("no campaign update provided")
 	}
 	return name, expiresAt, nil
 }

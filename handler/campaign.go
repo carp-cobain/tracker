@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/carp-cobain/tracker/dto"
@@ -25,14 +23,14 @@ func NewCampaignHandler(campaignKeeper keeper.CampaignKeeper) CampaignHandler {
 // GET /campaigns
 // GetCampaigns gets a page of campaigns for a blockchain account
 func (self CampaignHandler) GetCampaigns(c *gin.Context) {
-	account := strings.TrimSpace(c.Query("account"))
-	if err := dto.ValidateAccount(account); err != nil {
-		badRequestJson(c, fmt.Errorf("account query param is missing or invalid"))
+	account, err := dto.ValidateAccount(c.Query("account"))
+	if err != nil {
+		badRequestJson(c, err)
 		return
 	}
 	cursor, limit := getPageParams(c)
-	next, campaigns := self.campaignKeeper.GetCampaigns(account, cursor, limit)
-	okJson(c, gin.H{"cursor": next, "campaigns": campaigns})
+	nextCursor, campaigns := self.campaignKeeper.GetCampaigns(account, cursor, limit)
+	okJson(c, gin.H{"cursor": nextCursor, "campaigns": campaigns})
 }
 
 // GET /campaigns/:id
