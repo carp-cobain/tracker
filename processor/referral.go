@@ -12,7 +12,7 @@ import (
 )
 
 // processor page size
-const maxReferrals = 100
+const maxReferrals = 1000
 
 // pending status
 var pendingStatus = model.ReferralStatusPending.ToDomain()
@@ -30,12 +30,12 @@ func NewReferralVerifier(referralKeeper keeper.ReferralKeeper) ReferralVerifier 
 
 // VerifyReferrals verifies whether accounts for referrals in a "pending" status have made a trade.
 func (self *ReferralVerifier) VerifyReferrals() {
-	log.Printf("VerifyReferrals: %s", time.Now().UTC())
-	cursor, referrals := self.referralKeeper.GetReferralsWithStatus(pendingStatus, self.cursor, maxReferrals)
+	nextCursor, referrals :=
+		self.referralKeeper.GetReferralsWithStatus(pendingStatus, self.cursor, maxReferrals)
 	for _, referral := range referrals {
 		self.verifyReferral(referral)
 	}
-	self.cursor = cursor
+	self.cursor = nextCursor
 }
 
 // verfiy referral logic

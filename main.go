@@ -49,7 +49,7 @@ func main() {
 	// Run background processors
 	referralVerifier := processor.NewReferralVerifier(referralRepo)
 	c := cron.New()
-	c.AddFunc("@every 1m", referralVerifier.VerifyReferrals)
+	c.AddFunc("@hourly", referralVerifier.VerifyReferrals)
 	c.Start()
 
 	// Run server
