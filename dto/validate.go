@@ -4,10 +4,19 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
+
+// ensure prefix is loaded only once
+var once sync.Once
+
+// account address prefix to be set from env var
+var accountPrefix string
 
 // validate a blockchain account address
 func ValidateAccount(account string) (string, error) {
+	// Ensure prefix is loaded from env only once
+	once.Do(loadPrefixEnv)
 	account = strings.TrimSpace(account)
 	if account == "" {
 		return "", fmt.Errorf("account address cannot be blank")
@@ -15,9 +24,8 @@ func ValidateAccount(account string) (string, error) {
 	if strings.ToLower(account) != account {
 		return "", fmt.Errorf("account address must be lower case")
 	}
-	prefix := lookupPrefixEnv()
-	if !strings.HasPrefix(account, prefix) {
-		return "", fmt.Errorf("account address must have prefix: %s", prefix)
+	if !strings.HasPrefix(account, accountPrefix) {
+		return "", fmt.Errorf("account address must have prefix: %s", accountPrefix)
 	}
 	length := len(account)
 	if length < 41 || length > 61 {
@@ -26,12 +34,11 @@ func ValidateAccount(account string) (string, error) {
 	return account, nil
 }
 
-// Determine address prefix based on env var
-func lookupPrefixEnv() string {
-	if mainnet, ok := os.LookupEnv("MAINNET"); ok {
-		if mainnet == "true" {
-			return "pb"
-		}
+// Load account address prefix based on env var
+func loadPrefixEnv() {
+	if mainnet := os.Getenv("MAINNET"); mainnet == "true" {
+		accountPrefix = "pb"
+	} else {
+		accountPrefix = "tp"
 	}
-	return "tp"
 }

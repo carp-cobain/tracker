@@ -54,7 +54,7 @@ func (self *ReferralVerifier) verifyReferral(referral domain.Referral) {
 
 // return a pseudo-random referral status
 func getTradeStatus(account string) (status string) {
-	log.Println("getting status for account: %s", account)
+	log.Printf("getting status for account: %s", account)
 	// simulate latency
 	ms, _ := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(200)))
 	time.Sleep(ms)
