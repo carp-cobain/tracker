@@ -5,12 +5,14 @@ import (
 	"os"
 )
 
+// RedirectConfig holds URLs for the redirect handler.
 type RedirectConfig struct {
 	SignupURL string
 	TargetURL string
 }
 
-func DefaultRedirectConfig() RedirectConfig {
+// LoadRedirectConfig loads config for a redirect handler from env vars.
+func LoadRedirectConfig() RedirectConfig {
 	return RedirectConfig{
 		SignupURL: requireEnvVar("SIGNUP_URL"),
 		TargetURL: requireEnvVar("TARGET_URL"),

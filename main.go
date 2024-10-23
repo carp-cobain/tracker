@@ -32,7 +32,7 @@ func main() {
 	// Handlers
 	campaignHandler := handler.NewCampaignHandler(campaignRepo)
 	referralHandler := handler.NewReferralHandler(campaignRepo, referralRepo)
-	redirectConfig := handler.DefaultRedirectConfig()
+	redirectConfig := handler.LoadRedirectConfig()
 	redirectHandler := handler.NewRedirectHandler(redirectConfig, campaignRepo, referralRepo)
 
 	// Router
