@@ -12,3 +12,10 @@ type Campaign struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	ExpiresAt time.Time `json:"expiresAt"`
 }
+
+// Return the number of seconds until the campaign expires
+func (self Campaign) TTL() int {
+	expires := self.ExpiresAt.UTC()
+	now := time.Now().UTC()
+	return int(expires.Sub(now).Seconds())
+}

@@ -14,3 +14,9 @@ export PORT=8080
 
 # blockchain
 export MAINNET=false
+
+# signup redirect
+export SIGNUP_URL="https://myapp.io/signup?redirectUrl=https%3A%2F%2Fmyapp.io%2Ftracker"
+export SIGNUP_COOKIE_PATH="/"
+export SIGNUP_COOKIE_DOMAIN="myapp.io"
+export TARGET_URL="https://myapp.io/target"
