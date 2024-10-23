@@ -14,12 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CookieName is the name for referral campaign cookies
-var CookieName string = "_referral_campaign"
-
-// MaxAge is the max age for referral campaign cookies
-var MaxAge int = 30 * 24 * 60 * 60
-
 // RedirectHandler is the http/json api for managing referral campaigns
 type RedirectHandler struct {
 	config         RedirectConfig
@@ -33,7 +27,6 @@ func NewRedirectHandler(
 	campaignReader keeper.CampaignReader,
 	referralKeeper keeper.ReferralKeeper,
 ) RedirectHandler {
-	log.Printf("RedirectConfig = %+v", config)
 	return RedirectHandler{config, campaignReader, referralKeeper}
 }
 
@@ -55,9 +48,9 @@ func (self RedirectHandler) SignupRedirect(c *gin.Context) {
 	// Found the campaign, and it has the correct type, so set the cookie.
 	if campaign, err := self.campaignReader.GetCampaign(campaignID); err == nil && campaign.Type == "referral" {
 		c.SetCookie(
-			CookieName,
+			self.config.CookieName,
 			fmt.Sprintf("%d", campaign.ID),
-			min(MaxAge, campaign.TTL()),
+			min(self.config.CookieMaxAge, campaign.TTL()),
 			os.Getenv("SIGNUP_COOKIE_PATH"),
 			os.Getenv("SIGNUP_COOKIE_DOMAIN"),
 			false,
@@ -98,7 +91,7 @@ func (self RedirectHandler) ReferralCaptureRedirect(c *gin.Context) {
 func (self RedirectHandler) cookieCampaign(c *gin.Context) (campaign domain.Campaign, err error) {
 	// Check for cookie, redirect if not found.
 	var cookie string
-	if cookie, err = c.Cookie(CookieName); err != nil {
+	if cookie, err = c.Cookie(self.config.CookieName); err != nil {
 		return
 	}
 	// Lookup campaign for cookie value
