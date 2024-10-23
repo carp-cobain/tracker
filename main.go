@@ -38,8 +38,8 @@ func main() {
 	r := gin.Default()
 
 	// Signup redirects
-	r.GET("/tracker", redirectHandler.TrackReferrals)
-	r.GET("/tracker/:id/signup", redirectHandler.Signup)
+	r.GET("/tracker/referrals", redirectHandler.ReferralCaptureRedirect)
+	r.GET("/tracker/referrals/signup", redirectHandler.SignupRedirect)
 
 	// API
 	v1 := r.Group("/tracker/api/v1")

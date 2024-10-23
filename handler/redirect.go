@@ -15,7 +15,7 @@ import (
 )
 
 // CookieName is the name for referral campaign cookies
-var CookieName string = "_campaign"
+var CookieName string = "_referral_campaign"
 
 // MaxAge is the max age for referral campaign cookies
 var MaxAge int = 30 * 24 * 60 * 60
@@ -34,49 +34,55 @@ func NewRedirectHandler(
 	return RedirectHandler{campaignReader, referralKeeper}
 }
 
-// GET /tracker/:id/signup
-// Signup drops a campaign cookie and redirects to a signup URL.
-func (self RedirectHandler) Signup(c *gin.Context) {
+// GET /tracker/referrals/signup
+// SignupRedirect drops a referral campaign cookie and redirects to a signup URL.
+func (self RedirectHandler) SignupRedirect(c *gin.Context) {
 	signupURL := envSignupURL()
-	campaignID, err := uintParam(c, "id")
+	campaign := c.Query("campaign")
+	if campaign == "" {
+		log.Println("no campaign param found")
+		c.Redirect(http.StatusFound, signupURL)
+		return
+	}
+	campaignID, err := strconv.ParseUint(campaign, 10, 64)
 	if err != nil {
+		log.Printf("failed to parse campaign param: %s", err.Error())
 		c.Redirect(http.StatusFound, signupURL)
 		return
 	}
 	if campaign, err := self.campaignReader.GetCampaign(campaignID); err == nil {
-		c.SetCookie(
-			CookieName,
-			fmt.Sprintf("%d", campaign.ID),
-			min(MaxAge, campaign.TTL()),
-			os.Getenv("SIGNUP_COOKIE_PATH"),
-			os.Getenv("SIGNUP_COOKIE_DOMAIN"),
-			false,
-			false,
-		)
+		if campaign.Type == "referral" {
+			c.SetCookie(
+				CookieName,
+				fmt.Sprintf("%d", campaign.ID),
+				min(MaxAge, campaign.TTL()),
+				os.Getenv("SIGNUP_COOKIE_PATH"),
+				os.Getenv("SIGNUP_COOKIE_DOMAIN"),
+				false,
+				false,
+			)
+		}
 	}
 	c.Redirect(http.StatusFound, signupURL)
 }
 
-// GET /tracker
-// TrackReferrals records signup referrals from campaign cookies then redirects to a target URL.
-func (self RedirectHandler) TrackReferrals(c *gin.Context) {
-	// Check for a redirect URL query param. Use internal target URL if not provided.
-	url := c.Query("redirectUrl")
-	if url == "" {
-		url = envTargetURL()
-	}
+// GET /tracker/referrals
+// ReferralCaptureRedirect records signup referrals from campaign cookies then redirects to a target URL.
+func (self RedirectHandler) ReferralCaptureRedirect(c *gin.Context) {
+	// Use env var target URL for redirect
+	targetURL := envTargetURL()
 	// Lookup campaign from cookie
 	campaign, err := self.cookieCampaign(c)
 	if err != nil {
 		log.Printf("failed to lookup campaign from cookie: %s", err.Error())
-		c.Redirect(http.StatusFound, url)
+		c.Redirect(http.StatusFound, targetURL)
 		return
 	}
 	// Assumes blockchain address is created during signup
 	account, err := self.findAccount(c)
 	if err != nil {
 		log.Printf("no valid blockchain account address found: %s", err.Error())
-		c.Redirect(http.StatusFound, url)
+		c.Redirect(http.StatusFound, targetURL)
 		return
 	}
 	// Store referral
@@ -86,7 +92,7 @@ func (self RedirectHandler) TrackReferrals(c *gin.Context) {
 		}
 	}
 	// Send user on their way
-	c.Redirect(http.StatusFound, url)
+	c.Redirect(http.StatusFound, targetURL)
 }
 
 // get referral campaign using cookie set during signup redirect.
