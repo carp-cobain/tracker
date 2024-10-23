@@ -28,8 +28,7 @@ func (self CampaignHandler) GetCampaigns(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	cursor, limit := getPageParams(c)
-	nextCursor, campaigns := self.campaignKeeper.GetCampaigns(account, cursor, limit)
+	nextCursor, campaigns := self.campaignKeeper.GetCampaigns(account, getPageParams(c))
 	okJson(c, gin.H{"cursor": nextCursor, "campaigns": campaigns})
 }
 

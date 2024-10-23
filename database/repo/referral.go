@@ -6,6 +6,7 @@ import (
 	"github.com/carp-cobain/tracker/database/model"
 	"github.com/carp-cobain/tracker/database/query"
 	"github.com/carp-cobain/tracker/domain"
+
 	"gorm.io/gorm"
 )
 
@@ -21,8 +22,14 @@ func NewReferralRepo(readDB, writeDB *gorm.DB) ReferralRepo {
 }
 
 // GetReferrals gets a page of referrals for a campaign.
-func (self ReferralRepo) GetReferrals(campaignID, cursor uint64, limit int) (next uint64, referrals []domain.Referral) {
-	models := query.SelectReferrals(self.readDB, campaignID, cursor, limit)
+func (self ReferralRepo) GetReferrals(
+	campaignID uint64,
+	pageParams domain.PageParams,
+) (
+	next uint64,
+	referrals []domain.Referral,
+) {
+	models := query.SelectReferrals(self.readDB, campaignID, pageParams.Cursor, pageParams.Limit)
 	referrals = make([]domain.Referral, len(models))
 	for i, model := range models {
 		referrals[i] = model.ToDomain()
@@ -32,7 +39,14 @@ func (self ReferralRepo) GetReferrals(campaignID, cursor uint64, limit int) (nex
 }
 
 // GetReferralsWithStatus gets a page of referrals with a given status.
-func (self ReferralRepo) GetReferralsWithStatus(status string, cursor uint64, limit int) (next uint64, referrals []domain.Referral) {
+func (self ReferralRepo) GetReferralsWithStatus(
+	status string,
+	pageParams domain.PageParams,
+) (
+	next uint64,
+	referrals []domain.Referral,
+) {
+	cursor, limit := pageParams.Cursor, pageParams.Limit
 	models := query.SelectReferralsWithStatus(self.readDB, status, cursor, limit)
 	referrals = make([]domain.Referral, len(models))
 	for i, model := range models {
@@ -43,7 +57,13 @@ func (self ReferralRepo) GetReferralsWithStatus(status string, cursor uint64, li
 }
 
 // CreateReferral creates a referral for a campaign.
-func (self ReferralRepo) CreateReferral(campaignID uint64, account string) (referral domain.Referral, err error) {
+func (self ReferralRepo) CreateReferral(
+	campaignID uint64,
+	account string,
+) (
+	referral domain.Referral,
+	err error,
+) {
 	var campaign model.Campaign
 	campaign, err = query.SelectCampaign(self.readDB, campaignID)
 	if err != nil {
@@ -66,9 +86,17 @@ func (self ReferralRepo) CreateReferral(campaignID uint64, account string) (refe
 }
 
 // UpdateReferral updates the status of a referral for a campaign.
-func (self ReferralRepo) UpdateReferral(referralID uint64, status string) (referral domain.Referral, err error) {
+func (self ReferralRepo) UpdateReferral(
+	referralID uint64,
+	statusValue string,
+) (
+	referral domain.Referral,
+	err error,
+) {
+	status := model.ReferralStatusFromString(statusValue)
 	var model model.Referral
-	if model, err = query.UpdateReferralStatus(self.writeDB, referralID, status); err == nil {
+	model, err = query.UpdateReferralStatus(self.writeDB, referralID, status)
+	if err == nil {
 		referral = model.ToDomain()
 	}
 	return

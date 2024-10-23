@@ -10,8 +10,8 @@ type ReferralKeeper interface {
 
 // ReferralReader reads campaign referrals
 type ReferralReader interface {
-	GetReferrals(campaignID, cursor uint64, limit int) (uint64, []domain.Referral)
-	GetReferralsWithStatus(status string, cursor uint64, limit int) (uint64, []domain.Referral)
+	GetReferrals(campaignID uint64, pageParams domain.PageParams) (uint64, []domain.Referral)
+	GetReferralsWithStatus(status string, pageParams domain.PageParams) (uint64, []domain.Referral)
 }
 
 // ReferralWriter writes campaign referrals

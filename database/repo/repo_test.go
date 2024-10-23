@@ -6,6 +6,7 @@ import (
 	"github.com/carp-cobain/tracker/database"
 	"github.com/carp-cobain/tracker/database/model"
 	"github.com/carp-cobain/tracker/database/repo"
+	"github.com/carp-cobain/tracker/domain"
 
 	"gorm.io/gorm"
 )
@@ -40,7 +41,8 @@ func TestCampaignRepo(t *testing.T) {
 	if _, err := campaignRepo.GetCampaign(campaign.ID); err != nil {
 		t.Fatalf("failed to get campaign: %+v", err)
 	}
-	if _, campaigns := campaignRepo.GetCampaigns(account, 0, 10); len(campaigns) != 1 {
+	params := domain.NewPageParams(0, 10)
+	if _, campaigns := campaignRepo.GetCampaigns(account, params); len(campaigns) != 1 {
 		t.Fatalf("got unexpected number of campaigns")
 	}
 }
@@ -66,7 +68,8 @@ func TestReferralRepo(t *testing.T) {
 	}
 
 	// Read
-	if _, referrals := referralRepo.GetReferrals(campaign.ID, 0, 10); len(referrals) != 1 {
+	params := domain.NewPageParams(0, 10)
+	if _, referrals := referralRepo.GetReferrals(campaign.ID, params); len(referrals) != 1 {
 		t.Fatalf("got unexpected number of referrals for campaign")
 	}
 

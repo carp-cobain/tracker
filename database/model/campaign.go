@@ -7,7 +7,7 @@ type Campaign struct {
 	ID        uint64 `gorm:"primarykey"`
 	Name      string
 	Account   string       `gorm:"index;not null"`
-	Type      CampaignType `gorm:"index;default 0"`
+	Type      CampaignType `gorm:"index"`
 	CreatedAt DateTime
 	UpdatedAt DateTime
 	ExpiresAt DateTime `gorm:"index"`

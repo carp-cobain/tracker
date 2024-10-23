@@ -32,8 +32,7 @@ func (self ReferralHandler) GetReferrals(c *gin.Context) {
 		notFoundJson(c, err)
 		return
 	}
-	cursor, limit := getPageParams(c)
-	nextCursor, referrals := self.referralKeeper.GetReferrals(campaignID, cursor, limit)
+	nextCursor, referrals := self.referralKeeper.GetReferrals(campaignID, getPageParams(c))
 	okJson(c, gin.H{"cursor": nextCursor, "referrals": referrals})
 }
 

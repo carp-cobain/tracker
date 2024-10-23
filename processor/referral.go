@@ -30,8 +30,8 @@ func NewReferralVerifier(referralKeeper keeper.ReferralKeeper) ReferralVerifier 
 
 // VerifyReferrals verifies whether accounts for referrals in a "pending" status have made a trade.
 func (self *ReferralVerifier) VerifyReferrals() {
-	nextCursor, referrals :=
-		self.referralKeeper.GetReferralsWithStatus(pendingStatus, self.cursor, maxReferrals)
+	pageParams := domain.NewPageParams(self.cursor, maxReferrals)
+	nextCursor, referrals := self.referralKeeper.GetReferralsWithStatus(pendingStatus, pageParams)
 	for _, referral := range referrals {
 		self.verifyReferral(referral)
 	}

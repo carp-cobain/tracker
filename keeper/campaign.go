@@ -15,7 +15,7 @@ type CampaignKeeper interface {
 // CampaignReader reads campaigns
 type CampaignReader interface {
 	GetCampaign(id uint64) (campaign domain.Campaign, err error)
-	GetCampaigns(account string, cursor uint64, limit int) (uint64, []domain.Campaign)
+	GetCampaigns(account string, pageParams domain.PageParams) (uint64, []domain.Campaign)
 }
 
 // CampaignWriter writes campaigns

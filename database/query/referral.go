@@ -39,9 +39,11 @@ func InsertReferral(db *gorm.DB, campaignID uint64, account string) (referral mo
 }
 
 // UpdateReferralStatus updates referral status.
-func UpdateReferralStatus(db *gorm.DB, referralID uint64, status string) (referral model.Referral, err error) {
+func UpdateReferralStatus(
+	db *gorm.DB, referralID uint64, status model.ReferralStatus) (referral model.Referral, err error) {
+
 	if referral, err = SelectReferral(db, referralID); err == nil {
-		data := updates{"status": model.ReferralStatusFromString(status)}
+		data := updates{"status": status}
 		err = db.Model(&referral).Updates(data).Error
 	}
 	return
