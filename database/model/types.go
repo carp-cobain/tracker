@@ -23,42 +23,6 @@ func Expiry() DateTime {
 	return DateTime(time.Now().Add(365 * 24 * time.Hour).Unix())
 }
 
-// CampaignType categorizes campaigns
-type CampaignType int
-
-const (
-	_ CampaignType = iota
-	CampaignTypeReferral
-	CampaignTypeMarketing
-	CampaignTypeRewards
-)
-
-// ToDomain converts a campaign type to a string.
-func (self CampaignType) ToDomain() (value string) {
-	switch self {
-	case CampaignTypeReferral:
-		value = "referral"
-	case CampaignTypeRewards:
-		value = "rewards"
-	case CampaignTypeMarketing:
-		value = "marketing"
-	}
-	return
-}
-
-// CampaignTypeFromString creates a campaign type from a string.
-func CampaignTypeFromString(value string) (campaignType CampaignType) {
-	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "rewards":
-		campaignType = CampaignTypeRewards
-	case "marketing":
-		campaignType = CampaignTypeMarketing
-	default:
-		campaignType = CampaignTypeReferral
-	}
-	return
-}
-
 // ReferralStatus categorizes referrals
 type ReferralStatus int
 

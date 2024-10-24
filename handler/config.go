@@ -28,10 +28,10 @@ func LoadRedirectConfig() RedirectConfig {
 }
 
 // Lookup target URL from env var and panic if not found.
-func requireEnvVar(name string) string {
-	url, ok := os.LookupEnv(name)
+func requireEnvVar(key string) string {
+	value, ok := os.LookupEnv(key)
 	if !ok {
-		log.Panicf("%n not defined", name)
+		log.Panicf("%n not defined", key)
 	}
-	return url
+	return value
 }

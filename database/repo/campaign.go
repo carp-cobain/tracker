@@ -23,9 +23,9 @@ func NewCampaignRepo(readDB, writeDB *gorm.DB) CampaignRepo {
 
 // GetCampaign gets a campaign by ID
 func (self CampaignRepo) GetCampaign(id uint64) (campaign domain.Campaign, err error) {
-	var model model.Campaign
-	if model, err = query.SelectCampaign(self.readDB, id); err == nil {
-		campaign = model.ToDomain()
+	var result model.Campaign
+	if result, err = query.SelectCampaign(self.readDB, id); err == nil {
+		campaign = result.ToDomain()
 	}
 	return
 }
@@ -35,14 +35,14 @@ func (self CampaignRepo) GetCampaigns(
 	account string,
 	pageParams domain.PageParams,
 ) (
-	next uint64,
+	nextCursor uint64,
 	campaigns []domain.Campaign,
 ) {
-	models := query.SelectCampaigns(self.readDB, account, pageParams.Cursor, pageParams.Limit)
-	campaigns = make([]domain.Campaign, len(models))
-	for i, model := range models {
-		campaigns[i] = model.ToDomain()
-		next = max(next, model.ID)
+	results := query.SelectCampaigns(self.readDB, account, pageParams.Cursor, pageParams.Limit)
+	campaigns = make([]domain.Campaign, len(results))
+	for i, result := range results {
+		campaigns[i] = result.ToDomain()
+		nextCursor = max(nextCursor, result.ID)
 	}
 	return
 }
@@ -55,9 +55,9 @@ func (self CampaignRepo) CreateCampaign(
 	campaign domain.Campaign,
 	err error,
 ) {
-	var model model.Campaign
-	if model, err = query.InsertCampaign(self.writeDB, account, name); err == nil {
-		campaign = model.ToDomain()
+	var result model.Campaign
+	if result, err = query.InsertCampaign(self.writeDB, account, name); err == nil {
+		campaign = result.ToDomain()
 	}
 	return
 }
@@ -71,10 +71,10 @@ func (self CampaignRepo) UpdateCampaign(
 	campaign domain.Campaign,
 	err error,
 ) {
+	var result model.Campaign
 	expiry := model.DateTime(expiresAt.Unix())
-	var model model.Campaign
-	if model, err = query.UpdateCampaign(self.writeDB, id, name, expiry); err == nil {
-		campaign = model.ToDomain()
+	if result, err = query.UpdateCampaign(self.writeDB, id, name, expiry); err == nil {
+		campaign = result.ToDomain()
 	}
 	return
 }

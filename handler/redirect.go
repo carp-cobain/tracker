@@ -46,7 +46,7 @@ func (self RedirectHandler) SignupRedirect(c *gin.Context) {
 		return
 	}
 	// Found the campaign, and it has the correct type, so set the cookie.
-	if campaign, err := self.campaignReader.GetCampaign(campaignID); err == nil && campaign.Type == "referral" {
+	if campaign, err := self.campaignReader.GetCampaign(campaignID); err == nil {
 		c.SetCookie(
 			self.config.CookieName,
 			fmt.Sprintf("%d", campaign.ID),
@@ -78,10 +78,8 @@ func (self RedirectHandler) ReferralCaptureRedirect(c *gin.Context) {
 		return
 	}
 	// Store referral
-	if campaign.Type == "referral" {
-		if _, err := self.referralKeeper.CreateReferral(campaign.ID, account); err != nil {
-			log.Printf("failed to record referral: %s", err.Error())
-		}
+	if _, err := self.referralKeeper.CreateReferral(campaign.ID, account); err != nil {
+		log.Printf("failed to record referral: %s", err.Error())
 	}
 	// Send user on their way
 	c.Redirect(http.StatusFound, self.config.TargetURL)

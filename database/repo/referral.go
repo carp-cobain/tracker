@@ -26,14 +26,14 @@ func (self ReferralRepo) GetReferrals(
 	campaignID uint64,
 	pageParams domain.PageParams,
 ) (
-	next uint64,
+	nextCursor uint64,
 	referrals []domain.Referral,
 ) {
-	models := query.SelectReferrals(self.readDB, campaignID, pageParams.Cursor, pageParams.Limit)
-	referrals = make([]domain.Referral, len(models))
-	for i, model := range models {
-		referrals[i] = model.ToDomain()
-		next = max(next, model.ID)
+	results := query.SelectReferrals(self.readDB, campaignID, pageParams.Cursor, pageParams.Limit)
+	referrals = make([]domain.Referral, len(results))
+	for i, result := range results {
+		referrals[i] = result.ToDomain()
+		nextCursor = max(nextCursor, result.ID)
 	}
 	return
 }
@@ -43,15 +43,15 @@ func (self ReferralRepo) GetReferralsWithStatus(
 	status string,
 	pageParams domain.PageParams,
 ) (
-	next uint64,
+	nextCursor uint64,
 	referrals []domain.Referral,
 ) {
 	cursor, limit := pageParams.Cursor, pageParams.Limit
-	models := query.SelectReferralsWithStatus(self.readDB, status, cursor, limit)
-	referrals = make([]domain.Referral, len(models))
-	for i, model := range models {
-		referrals[i] = model.ToDomain()
-		next = max(next, model.ID)
+	results := query.SelectReferralsWithStatus(self.readDB, status, cursor, limit)
+	referrals = make([]domain.Referral, len(results))
+	for i, result := range results {
+		referrals[i] = result.ToDomain()
+		nextCursor = max(nextCursor, result.ID)
 	}
 	return
 }
@@ -70,17 +70,13 @@ func (self ReferralRepo) CreateReferral(
 		err = fmt.Errorf("campaign %d: %s", campaignID, err.Error())
 		return
 	}
-	if campaign.Type != model.CampaignTypeReferral {
-		err = fmt.Errorf("error: non-referral campaign: %s", campaign.Type.ToDomain())
-		return
-	}
 	if campaign.Account == account {
 		err = fmt.Errorf("self referral error: %s", account)
 		return
 	}
-	var model model.Referral
-	if model, err = query.InsertReferral(self.writeDB, campaignID, account); err == nil {
-		referral = model.ToDomain()
+	var result model.Referral
+	if result, err = query.InsertReferral(self.writeDB, campaignID, account); err == nil {
+		referral = result.ToDomain()
 	}
 	return
 }
@@ -93,11 +89,10 @@ func (self ReferralRepo) UpdateReferral(
 	referral domain.Referral,
 	err error,
 ) {
+	var result model.Referral
 	status := model.ReferralStatusFromString(statusValue)
-	var model model.Referral
-	model, err = query.UpdateReferralStatus(self.writeDB, referralID, status)
-	if err == nil {
-		referral = model.ToDomain()
+	if result, err = query.UpdateReferralStatus(self.writeDB, referralID, status); err == nil {
+		referral = result.ToDomain()
 	}
 	return
 }

@@ -33,9 +33,6 @@ func TestCampaignRepo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create campaign: %+v", err)
 	}
-	if campaign.Type != "referral" {
-		t.Fatalf("expected campaign type: referral, got: %s", campaign.Type)
-	}
 
 	// Read
 	if _, err := campaignRepo.GetCampaign(campaign.ID); err != nil {
