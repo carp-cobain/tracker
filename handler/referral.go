@@ -28,11 +28,13 @@ func (self ReferralHandler) GetReferrals(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	if _, err := self.campaignReader.GetCampaign(campaignID); err != nil {
-		notFoundJson(c, err)
-		return
-	}
 	nextCursor, referrals := self.referralKeeper.GetReferrals(campaignID, getPageParams(c))
+	if len(referrals) == 0 {
+		if _, err := self.campaignReader.GetCampaign(campaignID); err != nil {
+			notFoundJson(c, err)
+			return
+		}
+	}
 	okJson(c, gin.H{"cursor": nextCursor, "referrals": referrals})
 }
 
