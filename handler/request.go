@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/carp-cobain/tracker/domain"
+	"github.com/carp-cobain/tracker/dto"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,4 +39,17 @@ func clamp(limit int) int {
 		return limit
 	}
 	return 10
+}
+
+// find blockchain account address from header or query param
+func findAccount(c *gin.Context) (string, error) {
+	account := c.GetHeader("x-account-address")
+	if account == "" {
+		account = c.Query("account")
+	}
+	account, err := dto.ValidateAccount(account)
+	if err != nil {
+		return "", err
+	}
+	return account, nil
 }

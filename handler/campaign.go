@@ -23,12 +23,13 @@ func NewCampaignHandler(campaignKeeper keeper.CampaignKeeper) CampaignHandler {
 // GET /campaigns
 // GetCampaigns gets a page of campaigns for a blockchain account
 func (self CampaignHandler) GetCampaigns(c *gin.Context) {
-	account, err := dto.ValidateAccount(c.Query("account"))
+	account, err := findAccount(c)
 	if err != nil {
 		badRequestJson(c, err)
 		return
 	}
-	campaigns := self.campaignKeeper.GetCampaigns(account, getPageParams(c))
+	pageParms := getPageParams(c)
+	campaigns := self.campaignKeeper.GetCampaigns(account, pageParms)
 	c.JSON(http.StatusOK, campaigns)
 }
 
