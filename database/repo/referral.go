@@ -22,9 +22,7 @@ func NewReferralRepo(readDB, writeDB *gorm.DB) ReferralRepo {
 }
 
 // GetReferrals gets a page of referrals for a campaign.
-func (self ReferralRepo) GetReferrals(
-	campaignID uint64, pageParams domain.PageParams) domain.Page[domain.Referral] {
-
+func (self ReferralRepo) GetReferrals(campaignID uint64, pageParams domain.PageParams) ReferralPage {
 	var nextCursor uint64
 	models := query.SelectReferrals(self.readDB, campaignID, pageParams.Cursor, pageParams.Limit)
 	referrals := make([]domain.Referral, len(models))
@@ -36,9 +34,7 @@ func (self ReferralRepo) GetReferrals(
 }
 
 // GetReferralsWithStatus gets a page of referrals with a given status.
-func (self ReferralRepo) GetReferralsWithStatus(
-	status string, pageParams domain.PageParams) domain.Page[domain.Referral] {
-
+func (self ReferralRepo) GetReferralsWithStatus(status string, pageParams domain.PageParams) ReferralPage {
 	var nextCursor uint64
 	cursor, limit := pageParams.Cursor, pageParams.Limit
 	models := query.SelectReferralsWithStatus(self.readDB, status, cursor, limit)
@@ -51,13 +47,7 @@ func (self ReferralRepo) GetReferralsWithStatus(
 }
 
 // CreateReferral creates a referral for a campaign.
-func (self ReferralRepo) CreateReferral(
-	campaignID uint64,
-	account string,
-) (
-	referral domain.Referral,
-	err error,
-) {
+func (self ReferralRepo) CreateReferral(campaignID uint64, account string) (referral domain.Referral, err error) {
 	var campaign model.Campaign
 	campaign, err = query.SelectCampaign(self.readDB, campaignID)
 	if err != nil {
@@ -80,13 +70,7 @@ func (self ReferralRepo) CreateReferral(
 }
 
 // UpdateReferral updates the status of a referral for a campaign.
-func (self ReferralRepo) UpdateReferral(
-	referralID uint64,
-	statusValue string,
-) (
-	referral domain.Referral,
-	err error,
-) {
+func (self ReferralRepo) UpdateReferral(referralID uint64, statusValue string) (referral domain.Referral, err error) {
 	status := model.ReferralStatusFromString(statusValue)
 	var model model.Referral
 	model, err = query.UpdateReferralStatus(self.writeDB, referralID, status)

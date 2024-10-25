@@ -6,31 +6,29 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/carp-cobain/tracker/database/model"
 	"github.com/carp-cobain/tracker/domain"
 	"github.com/carp-cobain/tracker/keeper"
 )
 
-// processor page size
-const maxReferrals = 1000
-
-// pending status
-var pendingStatus = model.ReferralStatusPending.ToDomain()
-
 // ReferralVerifier verifies that referrals have placed an order on the exchange.
 type ReferralVerifier struct {
 	referralKeeper keeper.ReferralKeeper
+	batchSize      int
 	cursor         uint64
 }
 
 // NewReferralVerifier creates a new referral verifier.
-func NewReferralVerifier(referralKeeper keeper.ReferralKeeper) ReferralVerifier {
-	return ReferralVerifier{referralKeeper, 0}
+func NewReferralVerifier(
+	referralKeeper keeper.ReferralKeeper,
+	batchSize int,
+	startCursor uint64,
+) ReferralVerifier {
+	return ReferralVerifier{referralKeeper, batchSize, startCursor}
 }
 
 // VerifyReferrals verifies whether accounts for referrals in a "pending" status have made a trade.
 func (self *ReferralVerifier) VerifyReferrals() {
-	pageParams := domain.NewPageParams(self.cursor, maxReferrals)
+	pageParams := domain.NewPageParams(self.cursor, self.batchSize)
 	page := self.referralKeeper.GetReferralsWithStatus(pendingStatus, pageParams)
 	for _, referral := range page.Data {
 		self.verifyReferral(referral)
@@ -60,9 +58,9 @@ func getTradeStatus(account string) (status string) {
 	time.Sleep(ms)
 	// simulate ~80% success rate
 	if rand.Float32() < 0.8 {
-		status = model.ReferralStatusVerified.ToDomain()
+		status = verifiedStatus
 	} else {
-		status = model.ReferralStatusCanceled.ToDomain()
+		status = canceledStatus
 	}
 	return
 }

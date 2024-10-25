@@ -31,10 +31,7 @@ func (self CampaignRepo) GetCampaign(id uint64) (campaign domain.Campaign, err e
 }
 
 // GetCampaigns gets a page of campaigns for a blockchain account
-func (self CampaignRepo) GetCampaigns(
-	account string,
-	pageParams domain.PageParams,
-) domain.Page[domain.Campaign] {
+func (self CampaignRepo) GetCampaigns(account string, pageParams domain.PageParams) CampaignPage {
 	var nextCursor uint64
 	models := query.SelectCampaigns(self.readDB, account, pageParams.Cursor, pageParams.Limit)
 	campaigns := make([]domain.Campaign, len(models))
@@ -46,13 +43,7 @@ func (self CampaignRepo) GetCampaigns(
 }
 
 // CreateCampaign creates a new named campaign
-func (self CampaignRepo) CreateCampaign(
-	account string,
-	name string,
-) (
-	campaign domain.Campaign,
-	err error,
-) {
+func (self CampaignRepo) CreateCampaign(account, name string) (campaign domain.Campaign, err error) {
 	var model model.Campaign
 	if model, err = query.InsertCampaign(self.writeDB, account, name); err == nil {
 		campaign = model.ToDomain()
@@ -62,13 +53,8 @@ func (self CampaignRepo) CreateCampaign(
 
 // UpdateCampaign updates campaign fields.
 func (self CampaignRepo) UpdateCampaign(
-	id uint64,
-	name string,
-	expiresAt time.Time,
-) (
-	campaign domain.Campaign,
-	err error,
-) {
+	id uint64, name string, expiresAt time.Time) (campaign domain.Campaign, err error) {
+
 	expiry := model.DateTime(expiresAt.Unix())
 	var model model.Campaign
 	if model, err = query.UpdateCampaign(self.writeDB, id, name, expiry); err == nil {
