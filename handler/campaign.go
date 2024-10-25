@@ -28,8 +28,8 @@ func (self CampaignHandler) GetCampaigns(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	nextCursor, campaigns := self.campaignKeeper.GetCampaigns(account, getPageParams(c))
-	okJson(c, gin.H{"cursor": nextCursor, "campaigns": campaigns})
+	campaigns := self.campaignKeeper.GetCampaigns(account, getPageParams(c))
+	c.JSON(http.StatusOK, campaigns)
 }
 
 // GET /campaigns/:id

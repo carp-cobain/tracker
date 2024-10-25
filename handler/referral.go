@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/carp-cobain/tracker/dto"
 	"github.com/carp-cobain/tracker/keeper"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,12 +31,15 @@ func (self ReferralHandler) GetReferrals(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	if _, err := self.campaignReader.GetCampaign(campaignID); err != nil {
-		notFoundJson(c, err)
-		return
+	referrals := self.referralKeeper.GetReferrals(campaignID, getPageParams(c))
+	if referrals.IsEmpty() {
+		// Only verify campaign exists when no referrals are found
+		if _, err := self.campaignReader.GetCampaign(campaignID); err != nil {
+			notFoundJson(c, err)
+			return
+		}
 	}
-	nextCursor, referrals := self.referralKeeper.GetReferrals(campaignID, getPageParams(c))
-	okJson(c, gin.H{"cursor": nextCursor, "referrals": referrals})
+	c.JSON(http.StatusOK, referrals)
 }
 
 // POST /campaigns/:id/referrals

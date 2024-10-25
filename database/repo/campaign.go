@@ -34,17 +34,15 @@ func (self CampaignRepo) GetCampaign(id uint64) (campaign domain.Campaign, err e
 func (self CampaignRepo) GetCampaigns(
 	account string,
 	pageParams domain.PageParams,
-) (
-	next uint64,
-	campaigns []domain.Campaign,
-) {
+) domain.Page[domain.Campaign] {
+	var nextCursor uint64
 	models := query.SelectCampaigns(self.readDB, account, pageParams.Cursor, pageParams.Limit)
-	campaigns = make([]domain.Campaign, len(models))
+	campaigns := make([]domain.Campaign, len(models))
 	for i, model := range models {
 		campaigns[i] = model.ToDomain()
-		next = max(next, model.ID)
+		nextCursor = max(nextCursor, model.ID)
 	}
-	return
+	return domain.NewPage(nextCursor, pageParams.Limit, campaigns)
 }
 
 // CreateCampaign creates a new named campaign

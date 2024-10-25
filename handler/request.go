@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/carp-cobain/tracker/domain"
+
 	"github.com/gin-gonic/gin"
 )
 

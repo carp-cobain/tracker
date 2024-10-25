@@ -23,37 +23,31 @@ func NewReferralRepo(readDB, writeDB *gorm.DB) ReferralRepo {
 
 // GetReferrals gets a page of referrals for a campaign.
 func (self ReferralRepo) GetReferrals(
-	campaignID uint64,
-	pageParams domain.PageParams,
-) (
-	next uint64,
-	referrals []domain.Referral,
-) {
+	campaignID uint64, pageParams domain.PageParams) domain.Page[domain.Referral] {
+
+	var nextCursor uint64
 	models := query.SelectReferrals(self.readDB, campaignID, pageParams.Cursor, pageParams.Limit)
-	referrals = make([]domain.Referral, len(models))
+	referrals := make([]domain.Referral, len(models))
 	for i, model := range models {
 		referrals[i] = model.ToDomain()
-		next = max(next, model.ID)
+		nextCursor = max(nextCursor, model.ID)
 	}
-	return
+	return domain.NewPage(nextCursor, pageParams.Limit, referrals)
 }
 
 // GetReferralsWithStatus gets a page of referrals with a given status.
 func (self ReferralRepo) GetReferralsWithStatus(
-	status string,
-	pageParams domain.PageParams,
-) (
-	next uint64,
-	referrals []domain.Referral,
-) {
+	status string, pageParams domain.PageParams) domain.Page[domain.Referral] {
+
+	var nextCursor uint64
 	cursor, limit := pageParams.Cursor, pageParams.Limit
 	models := query.SelectReferralsWithStatus(self.readDB, status, cursor, limit)
-	referrals = make([]domain.Referral, len(models))
+	referrals := make([]domain.Referral, len(models))
 	for i, model := range models {
 		referrals[i] = model.ToDomain()
-		next = max(next, model.ID)
+		nextCursor = max(nextCursor, model.ID)
 	}
-	return
+	return domain.NewPage(nextCursor, pageParams.Limit, referrals)
 }
 
 // CreateReferral creates a referral for a campaign.

@@ -42,7 +42,7 @@ func TestCampaignRepo(t *testing.T) {
 		t.Fatalf("failed to get campaign: %+v", err)
 	}
 	params := domain.NewPageParams(0, 10)
-	if _, campaigns := campaignRepo.GetCampaigns(account, params); len(campaigns) != 1 {
+	if page := campaignRepo.GetCampaigns(account, params); len(page.Data) != 1 {
 		t.Fatalf("got unexpected number of campaigns")
 	}
 }
@@ -69,7 +69,7 @@ func TestReferralRepo(t *testing.T) {
 
 	// Read
 	params := domain.NewPageParams(0, 10)
-	if _, referrals := referralRepo.GetReferrals(campaign.ID, params); len(referrals) != 1 {
+	if page := referralRepo.GetReferrals(campaign.ID, params); len(page.Data) != 1 {
 		t.Fatalf("got unexpected number of referrals for campaign")
 	}
 
