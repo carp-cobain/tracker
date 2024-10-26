@@ -46,11 +46,14 @@ func main() {
 		v1.POST("/campaigns/:id/referrals", referralHandler.CreateReferral)
 	}
 
-	// Run background processors
-	batchSize, startCursor := 100, uint64(0)
-	referralVerifier := processor.NewReferralVerifier(referralRepo, batchSize, startCursor)
+	// Processors
+	referralVerifier := processor.NewReferralVerifier(referralRepo, 350, 0)
+	referralPayer := processor.NewReferralPayer(referralRepo, 700, 0)
+
+	// Processor scheduling
 	c := cron.New()
-	c.AddFunc("@hourly", referralVerifier.VerifyReferrals)
+	c.AddFunc("*/30 * * * *", referralVerifier.VerifyReferrals) // Run every 30th minute
+	c.AddFunc("@hourly", referralPayer.PayVerifiedReferrals)    // Run once an hour, beginning of hour
 	c.Start()
 
 	// Run server

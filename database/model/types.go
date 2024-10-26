@@ -28,8 +28,11 @@ type CampaignType int
 
 const (
 	_ CampaignType = iota
+	// CampaignTypeReferral means both referer and referee get a bonus
 	CampaignTypeReferral
+	// CampaignTypeMarketing just a classifier for marketing purposes (no bonus)
 	CampaignTypeMarketing
+	// CampaignTypeRewards means only the referee gets bonus
 	CampaignTypeRewards
 )
 
@@ -63,9 +66,13 @@ func CampaignTypeFromString(value string) (campaignType CampaignType) {
 type ReferralStatus int
 
 const (
+	// ReferralStatusPending means a referral needs to be verified
 	ReferralStatusPending ReferralStatus = iota
+	// ReferralStatusVerified means a referee has passed kyc and traded crypto
 	ReferralStatusVerified
+	// ReferralStatusProcessed means bonus has been issued for a verified referral
 	ReferralStatusProcessed
+	// ReferralStatusCanceled means a referral could not be verified (no bonus issued)
 	ReferralStatusCanceled
 )
 
