@@ -70,8 +70,8 @@ const (
 	ReferralStatusPending ReferralStatus = iota
 	// ReferralStatusVerified means a referee has passed kyc and traded crypto
 	ReferralStatusVerified
-	// ReferralStatusProcessed means bonus has been issued for a verified referral
-	ReferralStatusProcessed
+	// ReferralStatusPaid means bonus has been issued for a verified referral
+	ReferralStatusPaid
 	// ReferralStatusCanceled means a referral could not be verified (no bonus issued)
 	ReferralStatusCanceled
 )
@@ -83,8 +83,8 @@ func (self ReferralStatus) ToDomain() (value string) {
 		value = "pending"
 	case ReferralStatusVerified:
 		value = "verified"
-	case ReferralStatusProcessed:
-		value = "processed"
+	case ReferralStatusPaid:
+		value = "paid"
 	case ReferralStatusCanceled:
 		value = "canceled"
 	}
@@ -96,8 +96,8 @@ func ReferralStatusFromString(value string) (referralStatus ReferralStatus) {
 	switch strings.ToLower(strings.TrimSpace(value)) {
 	case "verified":
 		referralStatus = ReferralStatusVerified
-	case "processed":
-		referralStatus = ReferralStatusProcessed
+	case "paid":
+		referralStatus = ReferralStatusPaid
 	case "canceled":
 		referralStatus = ReferralStatusCanceled
 	default:

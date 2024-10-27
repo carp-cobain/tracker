@@ -31,4 +31,4 @@ restore:
 
 .PHONY: exec
 exec:
-	@litestream replicate -config litestream.yml -exec "$(CURDIR)/tracker"
+	@litestream replicate -config litestream.yml -exec "$(CURDIR)/tracker" > /dev/null 2>&1

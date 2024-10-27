@@ -41,13 +41,13 @@ func (self *ReferralPayer) makeReferralPayment(referral domain.Referral) {
 	// simulate broadcasting a cosmos blockchain transaction
 	broadcastTime, _ := time.ParseDuration("5s")
 	time.Sleep(broadcastTime)
-	// all referrals just get marked as processed in this POC
-	log.Printf("setting referral %d status to %s", referral.ID, processedStatus)
-	if _, err := self.referralKeeper.UpdateReferral(referral.ID, processedStatus); err != nil {
+	// all referrals just get marked as "paid" in this POC
+	log.Printf("setting referral %d status to %s", referral.ID, paidStatus)
+	if _, err := self.referralKeeper.UpdateReferral(referral.ID, paidStatus); err != nil {
 		log.Printf(
 			"failed to update referral %d to status %s: %s",
 			referral.ID,
-			processedStatus,
+			paidStatus,
 			err.Error(),
 		)
 	}
