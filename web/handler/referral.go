@@ -3,8 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/carp-cobain/tracker/dto"
+	"github.com/carp-cobain/tracker/domain"
 	"github.com/carp-cobain/tracker/keeper"
+	"github.com/carp-cobain/tracker/web/dto"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,12 +27,13 @@ func NewReferralHandler(
 // GET /campaigns/:id/referrals
 // GetReferrals gets a page of referrals for a campaign
 func (self ReferralHandler) GetReferrals(c *gin.Context) {
-	campaignID, err := uintParam(c, "id")
+	campaignID, err := domain.ParseCampaignID(c.Param("id"))
 	if err != nil {
 		badRequestJson(c, err)
 		return
 	}
-	referrals := self.referralKeeper.GetReferrals(campaignID, getPageParams(c))
+	pageParams := getPageParams(c)
+	referrals := self.referralKeeper.GetReferrals(campaignID, pageParams)
 	if referrals.IsEmpty() {
 		// Only verify campaign exists when no referrals are found
 		if _, err := self.campaignReader.GetCampaign(campaignID); err != nil {
@@ -39,13 +41,13 @@ func (self ReferralHandler) GetReferrals(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusOK, referrals)
+	c.JSON(http.StatusOK, gin.H{"referrals": referrals})
 }
 
 // POST /campaigns/:id/referrals
 // CreateSignup creates a referral for a campaign
 func (self ReferralHandler) CreateReferral(c *gin.Context) {
-	campaignID, err := uintParam(c, "id")
+	campaignID, err := domain.ParseCampaignID(c.Param("id"))
 	if err != nil {
 		badRequestJson(c, err)
 		return
@@ -55,7 +57,7 @@ func (self ReferralHandler) CreateReferral(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	account, err := request.Validate()
+	account, err := request.Account.Validate()
 	if err != nil {
 		badRequestJson(c, err)
 		return

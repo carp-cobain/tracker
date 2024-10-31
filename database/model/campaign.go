@@ -1,16 +1,18 @@
 package model
 
-import "github.com/carp-cobain/tracker/domain"
+import (
+	"strings"
+
+	"github.com/carp-cobain/tracker/domain"
+)
 
 // Campaign represents a typed campaign for a blockchain account.
 type Campaign struct {
-	ID        uint64 `gorm:"primarykey"`
+	Model
 	Name      string
 	Account   string       `gorm:"index;not null"`
 	Type      CampaignType `gorm:"index"`
-	CreatedAt DateTime
-	UpdatedAt DateTime
-	ExpiresAt DateTime `gorm:"index"`
+	ExpiresAt DateTime     `gorm:"index"`
 }
 
 // NewCampaign creates a new referral campaign for a blockchain account.
@@ -24,8 +26,6 @@ func NewCampaignWithType(account, name string, campaignType CampaignType) Campai
 		Account:   account,
 		Name:      name,
 		Type:      campaignType,
-		CreatedAt: Now(),
-		UpdatedAt: Now(),
 		ExpiresAt: Expiry(),
 	}
 }
@@ -33,12 +33,51 @@ func NewCampaignWithType(account, name string, campaignType CampaignType) Campai
 // ToDomain converts a model to a domain object representation.
 func (self Campaign) ToDomain() domain.Campaign {
 	return domain.Campaign{
-		ID:        self.ID,
-		Account:   self.Account,
+		ID:        domain.MustParseCampaignID(self.ID),
+		Account:   domain.NewAccount(self.Account),
 		Name:      self.Name,
 		Type:      self.Type.ToDomain(),
 		CreatedAt: self.CreatedAt.ToDomain(),
 		UpdatedAt: self.UpdatedAt.ToDomain(),
 		ExpiresAt: self.ExpiresAt.ToDomain(),
 	}
+}
+
+// CampaignType categorizes campaigns
+type CampaignType int
+
+const (
+	_ CampaignType = iota
+	// CampaignTypeReferral means both referer and referee get a bonus
+	CampaignTypeReferral
+	// CampaignTypeMarketing just a classifier for marketing purposes (no bonus)
+	CampaignTypeMarketing
+	// CampaignTypeRewards means only the referee gets bonus
+	CampaignTypeRewards
+)
+
+// ToDomain converts a campaign type to a string.
+func (self CampaignType) ToDomain() (value string) {
+	switch self {
+	case CampaignTypeReferral:
+		value = "referral"
+	case CampaignTypeRewards:
+		value = "rewards"
+	case CampaignTypeMarketing:
+		value = "marketing"
+	}
+	return
+}
+
+// CampaignTypeFromString creates a campaign type from a string.
+func CampaignTypeFromString(value string) (campaignType CampaignType) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "rewards":
+		campaignType = CampaignTypeRewards
+	case "marketing":
+		campaignType = CampaignTypeMarketing
+	default:
+		campaignType = CampaignTypeReferral
+	}
+	return
 }

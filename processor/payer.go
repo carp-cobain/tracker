@@ -26,7 +26,6 @@ func NewReferralPayer(
 
 // PayVerifiedReferrals makes payments for verified referrals.
 func (self ReferralPayer) PayVerifiedReferrals() {
-	log.Println("PayVerifiedReferrals")
 	pageParams := domain.NewPageParams(self.pageCursor, self.batchSize)
 	page := self.referralKeeper.GetReferralsWithStatus(verifiedStatus, pageParams)
 	for _, referral := range page.Data {
@@ -42,10 +41,10 @@ func (self *ReferralPayer) makeReferralPayment(referral domain.Referral) {
 	broadcastTime, _ := time.ParseDuration("5s")
 	time.Sleep(broadcastTime)
 	// all referrals just get marked as "paid" in this POC
-	log.Printf("setting referral %d status to %s", referral.ID, paidStatus)
+	log.Printf("setting referral %s status to %s", referral.ID, paidStatus)
 	if _, err := self.referralKeeper.UpdateReferral(referral.ID, paidStatus); err != nil {
 		log.Printf(
-			"failed to update referral %d to status %s: %s",
+			"failed to update referral %s to status %s: %s",
 			referral.ID,
 			paidStatus,
 			err.Error(),

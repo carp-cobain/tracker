@@ -14,12 +14,12 @@ type CampaignKeeper interface {
 
 // CampaignReader reads campaigns
 type CampaignReader interface {
-	GetCampaign(id uint64) (campaign domain.Campaign, err error)
-	GetCampaigns(account string, pageParams domain.PageParams) domain.Page[domain.Campaign]
+	GetCampaign(domain.CampaignID) (domain.Campaign, error)
+	GetCampaigns(account domain.Account, pageParams domain.PageParams) domain.Page[domain.Campaign]
 }
 
 // CampaignWriter writes campaigns
 type CampaignWriter interface {
-	CreateCampaign(account, name string) (domain.Campaign, error)
-	UpdateCampaign(id uint64, name string, expiresAt time.Time) (domain.Campaign, error)
+	CreateCampaign(account domain.Account, name string) (domain.Campaign, error)
+	UpdateCampaign(campaignID domain.CampaignID, name string, expiresAt time.Time) (domain.Campaign, error)
 }

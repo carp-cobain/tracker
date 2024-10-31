@@ -3,7 +3,7 @@ export DB_PATH="tracker.db"
 export DB_DSN="$DB_PATH?_txlock=immediate"
 
 # replication
-export REPLICA_URL="s3://tracker.localhost:9000/v1"
+export REPLICA_URL="s3://tracker.localhost:9000/v2"
 export LITESTREAM_ACCESS_KEY_ID=minioadmin
 export LITESTREAM_SECRET_ACCESS_KEY=minioadmin
 

@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/carp-cobain/tracker/dto"
+	"github.com/carp-cobain/tracker/domain"
 	"github.com/carp-cobain/tracker/keeper"
+	"github.com/carp-cobain/tracker/web/dto"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,25 +24,25 @@ func NewCampaignHandler(campaignKeeper keeper.CampaignKeeper) CampaignHandler {
 // GET /campaigns
 // GetCampaigns gets a page of campaigns for a blockchain account
 func (self CampaignHandler) GetCampaigns(c *gin.Context) {
-	account, err := findAccount(c)
+	account, err := domain.NewAccount(c.Query("account")).Validate()
 	if err != nil {
 		badRequestJson(c, err)
 		return
 	}
 	pageParms := getPageParams(c)
 	campaigns := self.campaignKeeper.GetCampaigns(account, pageParms)
-	c.JSON(http.StatusOK, campaigns)
+	c.JSON(http.StatusOK, gin.H{"campaigns": campaigns})
 }
 
 // GET /campaigns/:id
 // GetCampaign gets campaigns by ID
 func (self CampaignHandler) GetCampaign(c *gin.Context) {
-	id, err := uintParam(c, "id")
+	campaignID, err := domain.ParseCampaignID(c.Param("id"))
 	if err != nil {
 		badRequestJson(c, err)
 		return
 	}
-	campaign, err := self.campaignKeeper.GetCampaign(id)
+	campaign, err := self.campaignKeeper.GetCampaign(campaignID)
 	if err != nil {
 		notFoundJson(c, err)
 		return
@@ -73,13 +74,13 @@ func (self CampaignHandler) CreateCampaign(c *gin.Context) {
 // DELETE /campaigns/:id
 // ExpireCampaign marks campaigns as expired
 func (self CampaignHandler) ExpireCampaign(c *gin.Context) {
-	id, err := uintParam(c, "id")
+	campaignID, err := domain.ParseCampaignID(c.Param("id"))
 	if err != nil {
 		badRequestJson(c, err)
 		return
 	}
 	expiresAt := time.Now()
-	if _, err := self.campaignKeeper.UpdateCampaign(id, "", expiresAt); err != nil {
+	if _, err := self.campaignKeeper.UpdateCampaign(campaignID, "", expiresAt); err != nil {
 		badRequestJson(c, err)
 		return
 	}
@@ -89,7 +90,7 @@ func (self CampaignHandler) ExpireCampaign(c *gin.Context) {
 // PATCH /campaigns/:id
 // UpdateCampaign updates campaign name and/or expiration.
 func (self CampaignHandler) UpdateCampaign(c *gin.Context) {
-	id, err := uintParam(c, "id")
+	campaignID, err := domain.ParseCampaignID(c.Param("id"))
 	if err != nil {
 		badRequestJson(c, err)
 		return
@@ -104,7 +105,7 @@ func (self CampaignHandler) UpdateCampaign(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	campaign, err := self.campaignKeeper.UpdateCampaign(id, name, expiresAt)
+	campaign, err := self.campaignKeeper.UpdateCampaign(campaignID, name, expiresAt)
 	if err != nil {
 		badRequestJson(c, err)
 		return

@@ -22,30 +22,32 @@ func NewCampaignRepo(readDB, writeDB *gorm.DB) CampaignRepo {
 }
 
 // GetCampaign gets a campaign by ID
-func (self CampaignRepo) GetCampaign(id uint64) (campaign domain.Campaign, err error) {
+func (self CampaignRepo) GetCampaign(campaignID domain.CampaignID) (campaign domain.Campaign, err error) {
 	var model model.Campaign
-	if model, err = query.SelectCampaign(self.readDB, id); err == nil {
+	if model, err = query.SelectCampaign(self.readDB, campaignID.String()); err == nil {
 		campaign = model.ToDomain()
 	}
 	return
 }
 
 // GetCampaigns gets a page of campaigns for a blockchain account
-func (self CampaignRepo) GetCampaigns(account string, pageParams domain.PageParams) CampaignPage {
+func (self CampaignRepo) GetCampaigns(
+	account domain.Account, pageParams domain.PageParams) domain.Page[domain.Campaign] {
+
 	var nextCursor uint64
-	models := query.SelectCampaigns(self.readDB, account, pageParams.Cursor, pageParams.Limit)
+	models := query.SelectCampaigns(self.readDB, account.String(), pageParams.Cursor, pageParams.Limit)
 	campaigns := make([]domain.Campaign, len(models))
 	for i, model := range models {
 		campaigns[i] = model.ToDomain()
-		nextCursor = max(nextCursor, model.ID)
+		nextCursor = max(nextCursor, uint64(model.CreatedAt))
 	}
 	return domain.NewPage(nextCursor, pageParams.Limit, campaigns)
 }
 
 // CreateCampaign creates a new named campaign
-func (self CampaignRepo) CreateCampaign(account, name string) (campaign domain.Campaign, err error) {
+func (self CampaignRepo) CreateCampaign(account domain.Account, name string) (campaign domain.Campaign, err error) {
 	var model model.Campaign
-	if model, err = query.InsertCampaign(self.writeDB, account, name); err == nil {
+	if model, err = query.InsertCampaign(self.writeDB, account.String(), name); err == nil {
 		campaign = model.ToDomain()
 	}
 	return
@@ -53,12 +55,30 @@ func (self CampaignRepo) CreateCampaign(account, name string) (campaign domain.C
 
 // UpdateCampaign updates campaign fields.
 func (self CampaignRepo) UpdateCampaign(
-	id uint64, name string, expiresAt time.Time) (campaign domain.Campaign, err error) {
+	campaignID domain.CampaignID, name string, expiresAt time.Time) (campaign domain.Campaign, err error) {
 
-	expiry := model.DateTime(expiresAt.Unix())
-	var model model.Campaign
-	if model, err = query.UpdateCampaign(self.writeDB, id, name, expiry); err == nil {
-		campaign = model.ToDomain()
+	// Ensure campaign exists
+	var existing model.Campaign
+	existing, err = query.SelectCampaign(self.readDB, campaignID.String())
+	if err != nil {
+		return
+	}
+
+	// Only apply non-zero updates, keeping existing values
+	var expires model.DateTime
+	if expiresAt.IsZero() {
+		expires = existing.ExpiresAt
+	} else {
+		expires = model.DateTime(expiresAt.Unix())
+	}
+	if name == "" {
+		name = existing.Name
+	}
+
+	// Apply any updates
+	var updated model.Campaign
+	if updated, err = query.UpdateCampaign(self.writeDB, existing, name, expires); err == nil {
+		campaign = updated.ToDomain()
 	}
 	return
 }

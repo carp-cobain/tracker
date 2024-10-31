@@ -6,8 +6,8 @@ import (
 
 	"github.com/carp-cobain/tracker/database"
 	"github.com/carp-cobain/tracker/database/repo"
-	"github.com/carp-cobain/tracker/handler"
 	"github.com/carp-cobain/tracker/processor"
+	"github.com/carp-cobain/tracker/web/handler"
 
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"

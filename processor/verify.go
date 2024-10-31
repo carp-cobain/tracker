@@ -29,7 +29,6 @@ func NewReferralVerifier(
 // VerifyReferrals verifies whether accounts for referrals in a "pending" status have passed kyc
 // and made a trade.
 func (self *ReferralVerifier) VerifyReferrals() {
-	log.Println("VerifyReferrals")
 	pageParams := domain.NewPageParams(self.pageCursor, self.batchSize)
 	page := self.referralKeeper.GetReferralsWithStatus(pendingStatus, pageParams)
 	for _, referral := range page.Data {
@@ -41,10 +40,10 @@ func (self *ReferralVerifier) VerifyReferrals() {
 // verfiy referral logic
 func (self *ReferralVerifier) verifyReferral(referral domain.Referral) {
 	status := verifyAccountStatus(referral.Account)
-	log.Printf("setting referral %d status to %s", referral.ID, status)
+	log.Printf("setting referral %s status to %s", referral.ID, status)
 	if _, err := self.referralKeeper.UpdateReferral(referral.ID, status); err != nil {
 		log.Printf(
-			"failed to update referral %d to status %s: %s",
+			"failed to update referral %s to status %s: %s",
 			referral.ID,
 			status,
 			err.Error(),
@@ -53,7 +52,7 @@ func (self *ReferralVerifier) verifyReferral(referral domain.Referral) {
 }
 
 // return a pseudo-random referral status
-func verifyAccountStatus(account string) (status string) {
+func verifyAccountStatus(account domain.Account) (status string) {
 	log.Printf("getting status for account: %s", account)
 	// simulate latency
 	ms, _ := time.ParseDuration(fmt.Sprintf("%dms", rand.Intn(250)))

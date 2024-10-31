@@ -6,8 +6,8 @@ import (
 )
 
 // SelectCampaign selects a campaign by id
-func SelectCampaign(db *gorm.DB, id uint64) (campaign model.Campaign, err error) {
-	if err = db.Where("id = ?", id).First(&campaign).Error; err == nil {
+func SelectCampaign(db *gorm.DB, campaignID string) (campaign model.Campaign, err error) {
+	if err = db.Where("id = ?", campaignID).First(&campaign).Error; err == nil {
 		if campaign.ExpiresAt <= model.Now() {
 			err = ErrCampaignExpired
 		}
@@ -19,8 +19,8 @@ func SelectCampaign(db *gorm.DB, id uint64) (campaign model.Campaign, err error)
 func SelectCampaigns(db *gorm.DB, account string, cursor uint64, limit int) (campaigns []model.Campaign) {
 	db.Where("account = ?", account).
 		Where("expires_at > ?", model.Now()).
-		Where("id > ?", cursor).
-		Order("id").
+		Where("created_at > ?", cursor).
+		Order("created_at").
 		Limit(limit).
 		Find(&campaigns)
 	return
@@ -33,18 +33,13 @@ func InsertCampaign(db *gorm.DB, account, name string) (campaign model.Campaign,
 	return
 }
 
-// UpdateCampaign sets the name and expiration timestamp of a campaign.
-func UpdateCampaign(db *gorm.DB, id uint64, name string, expiresAt model.DateTime) (model.Campaign, error) {
-	campaign, err := SelectCampaign(db, id)
-	if err != nil {
-		return campaign, err
-	}
-	if name == "" {
-		name = campaign.Name
-	}
-	if expiresAt <= 0 {
-		expiresAt = campaign.ExpiresAt
-	}
-	result := db.Model(&campaign).Updates(updates{"name": name, "expires_at": expiresAt})
+// UpdateCampaign sets the name and expiration timestamp of a campaign. This function assumes the
+// "SelectCampaign" function has been called to ensure the campaign exists.
+func UpdateCampaign(
+	db *gorm.DB, campaign model.Campaign, name string, expiresAt model.DateTime) (model.Campaign, error) {
+
+	result := db.Model(&campaign).
+		Updates(Changeset{"name": name, "expires_at": expiresAt})
+
 	return campaign, result.Error
 }
