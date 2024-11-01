@@ -1,23 +1,11 @@
 package handler
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/carp-cobain/tracker/domain"
-
 	"github.com/gin-gonic/gin"
 )
-
-// Read an unsigned integer parameter with the given key
-func uintParam(c *gin.Context, key string) (uint64, error) {
-	value := c.Param(key)
-	i, err := strconv.ParseUint(value, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("%s: expected uint64, got: %s", key, value)
-	}
-	return i, nil
-}
 
 // Get and return bounded query parameters for paging.
 // If no query params are found, default values are returned.

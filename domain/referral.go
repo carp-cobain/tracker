@@ -8,12 +8,12 @@ import (
 
 // Campaign represents a referral account for a campaign.
 type Referral struct {
-	ID         ReferralID `json:"id"`
-	CampaignID CampaignID `json:"campaignId"`
-	Account    Account    `json:"account"`
-	Status     string     `json:"status"`
-	CreatedAt  time.Time  `json:"createdAt"`
-	UpdatedAt  time.Time  `json:"updatedAt"`
+	ID         ReferralID     `json:"id"`
+	CampaignID CampaignID     `json:"campaignId"`
+	Account    Account        `json:"account"`
+	Status     ReferralStatus `json:"status"`
+	CreatedAt  time.Time      `json:"createdAt"`
+	UpdatedAt  time.Time      `json:"updatedAt"`
 }
 
 // ReferralID is a referral unique identifier.

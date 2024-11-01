@@ -8,13 +8,13 @@ import (
 
 // Campaign represents a named campaign for a blockchain account.
 type Campaign struct {
-	ID        CampaignID `json:"id"`
-	Account   Account    `json:"account"`
-	Name      string     `json:"name"`
-	Type      string     `json:"type"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
-	ExpiresAt time.Time  `json:"expiresAt"`
+	ID        CampaignID   `json:"id"`
+	Account   Account      `json:"account"`
+	Name      string       `json:"name"`
+	Type      CampaignType `json:"type"`
+	CreatedAt time.Time    `json:"createdAt"`
+	UpdatedAt time.Time    `json:"updatedAt"`
+	ExpiresAt time.Time    `json:"expiresAt"`
 }
 
 // CampaignID is a campaign unique identifier.

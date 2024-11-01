@@ -23,9 +23,9 @@ func NewCampaignRepo(readDB, writeDB *gorm.DB) CampaignRepo {
 
 // GetCampaign gets a campaign by ID
 func (self CampaignRepo) GetCampaign(campaignID domain.CampaignID) (campaign domain.Campaign, err error) {
-	var model model.Campaign
-	if model, err = query.SelectCampaign(self.readDB, campaignID.String()); err == nil {
-		campaign = model.ToDomain()
+	var result model.Campaign
+	if result, err = query.SelectCampaign(self.readDB, campaignID.String()); err == nil {
+		campaign = result.ToDomain()
 	}
 	return
 }
@@ -35,20 +35,20 @@ func (self CampaignRepo) GetCampaigns(
 	account domain.Account, pageParams domain.PageParams) domain.Page[domain.Campaign] {
 
 	var nextCursor uint64
-	models := query.SelectCampaigns(self.readDB, account.String(), pageParams.Cursor, pageParams.Limit)
-	campaigns := make([]domain.Campaign, len(models))
-	for i, model := range models {
-		campaigns[i] = model.ToDomain()
-		nextCursor = max(nextCursor, uint64(model.CreatedAt))
+	results := query.SelectCampaigns(self.readDB, account.String(), pageParams.Cursor, pageParams.Limit)
+	campaigns := make([]domain.Campaign, len(results))
+	for i, result := range results {
+		campaigns[i] = result.ToDomain()
+		nextCursor = max(nextCursor, uint64(result.CreatedAt))
 	}
 	return domain.NewPage(nextCursor, pageParams.Limit, campaigns)
 }
 
 // CreateCampaign creates a new named campaign
 func (self CampaignRepo) CreateCampaign(account domain.Account, name string) (campaign domain.Campaign, err error) {
-	var model model.Campaign
-	if model, err = query.InsertCampaign(self.writeDB, account.String(), name); err == nil {
-		campaign = model.ToDomain()
+	var result model.Campaign
+	if result, err = query.InsertCampaign(self.writeDB, account.String(), name); err == nil {
+		campaign = result.ToDomain()
 	}
 	return
 }

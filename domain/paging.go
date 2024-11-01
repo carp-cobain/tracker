@@ -5,6 +5,7 @@ type Page[T any] struct {
 	Cursor uint64 `json:"cursor"`
 	Limit  int    `json:"limit"`
 	Data   []T    `json:"data"`
+	Size   int    `json:"size"`
 }
 
 // NewPage creates a new page of data
@@ -13,6 +14,7 @@ func NewPage[T any](cursor uint64, limit int, data []T) Page[T] {
 		Cursor: cursor,
 		Limit:  limit,
 		Data:   data,
+		Size:   len(data),
 	}
 }
 

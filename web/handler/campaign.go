@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/carp-cobain/tracker/domain"
-	"github.com/carp-cobain/tracker/keeper"
+	"github.com/carp-cobain/tracker/service"
 	"github.com/carp-cobain/tracker/web/dto"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +13,12 @@ import (
 
 // CampaignHandler is the http/json api for managing campaigns
 type CampaignHandler struct {
-	campaignKeeper keeper.CampaignKeeper
+	campaignService service.CampaignService
 }
 
 // NewCampaignHandler creates a new campaign handler
-func NewCampaignHandler(campaignKeeper keeper.CampaignKeeper) CampaignHandler {
-	return CampaignHandler{campaignKeeper}
+func NewCampaignHandler(campaignService service.CampaignService) CampaignHandler {
+	return CampaignHandler{campaignService}
 }
 
 // GET /campaigns
@@ -30,8 +30,8 @@ func (self CampaignHandler) GetCampaigns(c *gin.Context) {
 		return
 	}
 	pageParms := getPageParams(c)
-	campaigns := self.campaignKeeper.GetCampaigns(account, pageParms)
-	c.JSON(http.StatusOK, gin.H{"campaigns": campaigns})
+	campaigns := self.campaignService.GetCampaigns(account, pageParms)
+	okJson(c, gin.H{"campaigns": campaigns})
 }
 
 // GET /campaigns/:id
@@ -42,7 +42,7 @@ func (self CampaignHandler) GetCampaign(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	campaign, err := self.campaignKeeper.GetCampaign(campaignID)
+	campaign, err := self.campaignService.GetCampaign(campaignID)
 	if err != nil {
 		notFoundJson(c, err)
 		return
@@ -63,12 +63,12 @@ func (self CampaignHandler) CreateCampaign(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	campaign, err := self.campaignKeeper.CreateCampaign(account, name)
+	campaign, err := self.campaignService.CreateCampaign(account, name)
 	if err != nil {
 		badRequestJson(c, err)
 		return
 	}
-	okJson(c, gin.H{"campaign": campaign})
+	createdJson(c, gin.H{"campaign": campaign})
 }
 
 // DELETE /campaigns/:id
@@ -80,7 +80,7 @@ func (self CampaignHandler) ExpireCampaign(c *gin.Context) {
 		return
 	}
 	expiresAt := time.Now()
-	if _, err := self.campaignKeeper.UpdateCampaign(campaignID, "", expiresAt); err != nil {
+	if _, err := self.campaignService.UpdateCampaign(campaignID, "", expiresAt); err != nil {
 		badRequestJson(c, err)
 		return
 	}
@@ -105,7 +105,7 @@ func (self CampaignHandler) UpdateCampaign(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	campaign, err := self.campaignKeeper.UpdateCampaign(campaignID, name, expiresAt)
+	campaign, err := self.campaignService.UpdateCampaign(campaignID, name, expiresAt)
 	if err != nil {
 		badRequestJson(c, err)
 		return

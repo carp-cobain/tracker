@@ -16,6 +16,19 @@ func NewAccount(address string) Account {
 	return Account{address}
 }
 
+// MustValidateAccount creates a new account and panics if the account address is invalid.
+func MustValidateAccount(address string) Account {
+	return Must(NewAccount(address).Validate())
+}
+
+// Must returns the account or panics if the given err is not nil.
+func Must(account Account, err error) Account {
+	if err != nil {
+		panic(err)
+	}
+	return account
+}
+
 // Validate checks whether an account's blockchain address is valid.
 func (self Account) Validate() (Account, error) {
 	address := strings.TrimSpace(self.address)
@@ -36,7 +49,7 @@ func (self Account) Validate() (Account, error) {
 	return self, nil
 }
 
-// Address returns the account address.
+// String returns the account address.
 func (self Account) String() string {
 	return self.address
 }

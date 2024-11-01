@@ -1,10 +1,8 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/carp-cobain/tracker/domain"
-	"github.com/carp-cobain/tracker/keeper"
+	"github.com/carp-cobain/tracker/service"
 	"github.com/carp-cobain/tracker/web/dto"
 
 	"github.com/gin-gonic/gin"
@@ -12,16 +10,16 @@ import (
 
 // ReferralHandler is the http/json api for managing campaign referrals
 type ReferralHandler struct {
-	campaignReader keeper.CampaignReader
-	referralKeeper keeper.ReferralKeeper
+	campaignReader  service.CampaignReader
+	referralService service.ReferralService
 }
 
 // NewReferralHandler creates a new referral campaign handler
 func NewReferralHandler(
-	campaignReader keeper.CampaignReader,
-	referralKeeper keeper.ReferralKeeper,
+	campaignReader service.CampaignReader,
+	referralService service.ReferralService,
 ) ReferralHandler {
-	return ReferralHandler{campaignReader, referralKeeper}
+	return ReferralHandler{campaignReader, referralService}
 }
 
 // GET /campaigns/:id/referrals
@@ -33,7 +31,7 @@ func (self ReferralHandler) GetReferrals(c *gin.Context) {
 		return
 	}
 	pageParams := getPageParams(c)
-	referrals := self.referralKeeper.GetReferrals(campaignID, pageParams)
+	referrals := self.referralService.GetReferrals(campaignID, pageParams)
 	if referrals.IsEmpty() {
 		// Only verify campaign exists when no referrals are found
 		if _, err := self.campaignReader.GetCampaign(campaignID); err != nil {
@@ -41,7 +39,7 @@ func (self ReferralHandler) GetReferrals(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{"referrals": referrals})
+	okJson(c, gin.H{"referrals": referrals})
 }
 
 // POST /campaigns/:id/referrals
@@ -57,16 +55,11 @@ func (self ReferralHandler) CreateReferral(c *gin.Context) {
 		badRequestJson(c, err)
 		return
 	}
-	account, err := request.Account.Validate()
-	if err != nil {
-		badRequestJson(c, err)
-		return
-	}
 	if _, err := self.campaignReader.GetCampaign(campaignID); err != nil {
 		notFoundJson(c, err)
 		return
 	}
-	referral, err := self.referralKeeper.CreateReferral(campaignID, account)
+	referral, err := self.referralService.CreateReferral(campaignID, request.Account)
 	if err != nil {
 		badRequestJson(c, err)
 		return

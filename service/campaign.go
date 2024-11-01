@@ -1,4 +1,4 @@
-package keeper
+package service
 
 import (
 	"time"
@@ -6,8 +6,8 @@ import (
 	"github.com/carp-cobain/tracker/domain"
 )
 
-// CampaignKeeper manages campaigns
-type CampaignKeeper interface {
+// CampaignService manages campaigns
+type CampaignService interface {
 	CampaignReader
 	CampaignWriter
 }

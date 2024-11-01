@@ -34,7 +34,7 @@ func NewCampaignWithType(account, name string, campaignType CampaignType) Campai
 func (self Campaign) ToDomain() domain.Campaign {
 	return domain.Campaign{
 		ID:        domain.MustParseCampaignID(self.ID),
-		Account:   domain.NewAccount(self.Account),
+		Account:   domain.MustValidateAccount(self.Account),
 		Name:      self.Name,
 		Type:      self.Type.ToDomain(),
 		CreatedAt: self.CreatedAt.ToDomain(),
@@ -57,24 +57,24 @@ const (
 )
 
 // ToDomain converts a campaign type to a string.
-func (self CampaignType) ToDomain() (value string) {
+func (self CampaignType) ToDomain() (value domain.CampaignType) {
 	switch self {
 	case CampaignTypeReferral:
-		value = "referral"
+		value = domain.ReferralType
 	case CampaignTypeRewards:
-		value = "rewards"
+		value = domain.RewardsType
 	case CampaignTypeMarketing:
-		value = "marketing"
+		value = domain.MarketingType
 	}
 	return
 }
 
-// CampaignTypeFromString creates a campaign type from a string.
-func CampaignTypeFromString(value string) (campaignType CampaignType) {
+// CampaignTypeFromDomain creates a campaign type from a string.
+func CampaignTypeFromDomain(value domain.CampaignType) (campaignType CampaignType) {
 	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "rewards":
+	case domain.RewardsType:
 		campaignType = CampaignTypeRewards
-	case "marketing":
+	case domain.MarketingType:
 		campaignType = CampaignTypeMarketing
 	default:
 		campaignType = CampaignTypeReferral

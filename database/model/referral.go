@@ -29,7 +29,7 @@ func (self Referral) ToDomain() domain.Referral {
 	return domain.Referral{
 		ID:         domain.MustParseReferralID(self.ID),
 		CampaignID: domain.MustParseCampaignID(self.CampaignID),
-		Account:    domain.NewAccount(self.Account),
+		Account:    domain.MustValidateAccount(self.Account),
 		Status:     self.Status.ToDomain(),
 		CreatedAt:  self.CreatedAt.ToDomain(),
 		UpdatedAt:  self.UpdatedAt.ToDomain(),
@@ -51,28 +51,28 @@ const (
 )
 
 // ToDomain converts a referral status to a string.
-func (self ReferralStatus) ToDomain() (value string) {
+func (self ReferralStatus) ToDomain() (value domain.ReferralStatus) {
 	switch self {
 	case ReferralStatusPending:
-		value = "pending"
+		value = domain.PendingStatus
 	case ReferralStatusVerified:
-		value = "verified"
+		value = domain.VerifiedStatus
 	case ReferralStatusPaid:
-		value = "paid"
+		value = domain.PaidStatus
 	case ReferralStatusCanceled:
-		value = "canceled"
+		value = domain.CanceledStatus
 	}
 	return
 }
 
-// ReferralStatusFromString creates a campaign type from a string.
-func ReferralStatusFromString(value string) (referralStatus ReferralStatus) {
+// ReferralStatusFromDomain creates a campaign type from a string.
+func ReferralStatusFromDomain(value domain.ReferralStatus) (referralStatus ReferralStatus) {
 	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "verified":
+	case domain.VerifiedStatus:
 		referralStatus = ReferralStatusVerified
-	case "paid":
+	case domain.PaidStatus:
 		referralStatus = ReferralStatusPaid
-	case "canceled":
+	case domain.CanceledStatus:
 		referralStatus = ReferralStatusCanceled
 	default:
 		referralStatus = ReferralStatusPending

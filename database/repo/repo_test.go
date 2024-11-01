@@ -25,7 +25,7 @@ func createTestDB(t *testing.T) *gorm.DB {
 func TestCampaignRepo(t *testing.T) {
 	// Setup
 	db := createTestDB(t)
-	account := domain.NewAccount("tpabc123")
+	account := domain.NewAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz2")
 	campaignRepo := repo.NewCampaignRepo(db, db)
 
 	// Create
@@ -54,14 +54,14 @@ func TestReferralRepo(t *testing.T) {
 	referralRepo := repo.NewReferralRepo(db, db)
 
 	// Base campaign
-	referer := domain.NewAccount("tpabc124")
+	referer := domain.NewAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz3")
 	campaign, err := campgaignRepo.CreateCampaign(referer, "Referral Unit Testing")
 	if err != nil {
 		t.Fatalf("failed to create referral campaign: %+v", err)
 	}
 
 	// Create
-	referee := domain.NewAccount("tpabc125")
+	referee := domain.NewAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz4")
 	referral, err := referralRepo.CreateReferral(campaign.ID, referee)
 	if err != nil {
 		t.Fatalf("failed to create referral: %+v", err)

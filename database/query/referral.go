@@ -12,9 +12,7 @@ func SelectReferral(db *gorm.DB, referralID string) (referral model.Referral, er
 }
 
 // SelectReferrals selects all referrals for a campaign.
-func SelectReferrals(
-	db *gorm.DB, campaignID string, cursor uint64, limit int) (referrals []model.Referral) {
-
+func SelectReferrals(db *gorm.DB, campaignID string, cursor uint64, limit int) (referrals []model.Referral) {
 	db.Where("campaign_id = ?", campaignID).
 		Where("created_at > ?", cursor).
 		Order("created_at").
@@ -25,10 +23,8 @@ func SelectReferrals(
 }
 
 // SelectReferralsWithStatus selects a page of referrals with a given status.
-func SelectReferralsWithStatus(
-	db *gorm.DB, status string, cursor uint64, limit int) (referrals []model.Referral) {
-
-	db.Where("status = ?", model.ReferralStatusFromString(status)).
+func SelectReferralsWithStatus(db *gorm.DB, status string, cursor uint64, limit int) (referrals []model.Referral) {
+	db.Where("status = ?", model.ReferralStatusFromDomain(status)).
 		Where("created_at > ?", cursor).
 		Order("created_at").
 		Limit(limit).
@@ -38,9 +34,7 @@ func SelectReferralsWithStatus(
 }
 
 // InsertReferral inserts a new referral for a campaign.
-func InsertReferral(
-	db *gorm.DB, campaignID, account string) (referral model.Referral, err error) {
-
+func InsertReferral(db *gorm.DB, campaignID, account string) (referral model.Referral, err error) {
 	referral = model.NewReferral(campaignID, account)
 	err = db.Create(&referral).Error
 	return
@@ -55,7 +49,7 @@ func UpdateReferralStatus(
 	referral model.Referral,
 	err error,
 ) {
-	status := model.ReferralStatusFromString(statusValue)
+	status := model.ReferralStatusFromDomain(statusValue)
 	if referral, err = SelectReferral(db, referralID); err == nil {
 		err = db.Model(&referral).
 			Updates(Changeset{"status": status}).
