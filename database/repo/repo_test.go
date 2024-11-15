@@ -26,7 +26,7 @@ func TestCampaignRepo(t *testing.T) {
 	// Setup
 	db := createTestDB(t)
 	account := domain.MustValidateAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz2")
-	campaignRepo := repo.NewCampaignRepo(db, db)
+	campaignRepo := repo.NewCampaignRepo(db)
 
 	// Create
 	campaign, err := campaignRepo.CreateCampaign(account, "Campaign Unit Testing")
@@ -56,11 +56,11 @@ func TestCampaignRepo(t *testing.T) {
 func TestReferralRepo(t *testing.T) {
 	// Setup
 	db := createTestDB(t)
-	referralRepo := repo.NewReferralRepo(db, db)
+	referralRepo := repo.NewReferralRepo(db)
 
 	// Base campaign
 	referer := domain.MustValidateAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz3")
-	campaign, err := repo.NewCampaignRepo(db, db).CreateCampaign(referer, "Referral Unit Testing")
+	campaign, err := repo.NewCampaignRepo(db).CreateCampaign(referer, "Referral Unit Testing")
 	if err != nil {
 		t.Fatalf("failed to create campaign: %+v", err)
 	}

@@ -40,14 +40,14 @@ func (self Referral) ToDomain() domain.Referral {
 type ReferralStatus int
 
 const (
+	// ReferralStatusCanceled means a referral could not be verified or paid (no bonus issued)
+	ReferralStatusCanceled ReferralStatus = iota
 	// ReferralStatusPending means a referral needs to be verified
-	ReferralStatusPending ReferralStatus = iota
+	ReferralStatusPending
 	// ReferralStatusVerified means a referee has passed kyc and traded crypto
 	ReferralStatusVerified
 	// ReferralStatusPaid means bonus has been issued for a verified referral
 	ReferralStatusPaid
-	// ReferralStatusCanceled means a referral could not be verified (no bonus issued)
-	ReferralStatusCanceled
 )
 
 // ToDomain converts a referral status to a string.

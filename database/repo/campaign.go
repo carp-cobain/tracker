@@ -16,9 +16,14 @@ type CampaignRepo struct {
 	writeDB *gorm.DB
 }
 
-// NewCampaignRepo creates a new repository for managing campaigns.
-func NewCampaignRepo(readDB, writeDB *gorm.DB) CampaignRepo {
+// NewCampaignRepoRW creates a new repository for managing campaigns.
+func NewCampaignRepoRW(readDB, writeDB *gorm.DB) CampaignRepo {
 	return CampaignRepo{readDB, writeDB}
+}
+
+// NewCampaignRepo creates a new repository for managing campaigns with only a single db pointer.
+func NewCampaignRepo(db *gorm.DB) CampaignRepo {
+	return CampaignRepo{db, db}
 }
 
 // GetCampaign gets a campaign by ID

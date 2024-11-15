@@ -16,9 +16,15 @@ type ReferralRepo struct {
 	writeDB *gorm.DB
 }
 
-// NewReferralRepo creates a new repository for managing referrals for campaigns.
-func NewReferralRepo(readDB, writeDB *gorm.DB) ReferralRepo {
+// NewReferralRepoRW creates a new repository for managing referrals for campaigns.
+func NewReferralRepoRW(readDB, writeDB *gorm.DB) ReferralRepo {
 	return ReferralRepo{readDB, writeDB}
+}
+
+// NewReferralRepo creates a new repository for managing referrals for campaigns
+// with only a single db pointer.
+func NewReferralRepo(db *gorm.DB) ReferralRepo {
+	return ReferralRepo{db, db}
 }
 
 // GetReferrals gets a page of referrals for a campaign.

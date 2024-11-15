@@ -26,8 +26,8 @@ func main() {
 	}
 
 	// Repos
-	campaignRepo := repo.NewCampaignRepo(readDB, writeDB)
-	referralRepo := repo.NewReferralRepo(readDB, writeDB)
+	campaignRepo := repo.NewCampaignRepoRW(readDB, writeDB)
+	referralRepo := repo.NewReferralRepoRW(readDB, writeDB)
 
 	// Handlers
 	campaignHandler := handler.NewCampaignHandler(campaignRepo)
