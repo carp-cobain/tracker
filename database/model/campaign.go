@@ -17,15 +17,10 @@ type Campaign struct {
 
 // NewCampaign creates a new referral campaign for a blockchain account.
 func NewCampaign(account, name string) Campaign {
-	return NewCampaignWithType(account, name, CampaignTypeReferral)
-}
-
-// NewCampaignWithType creates a new campaign with a given type for a blockchain account.
-func NewCampaignWithType(account, name string, campaignType CampaignType) Campaign {
 	return Campaign{
 		Account:   account,
 		Name:      name,
-		Type:      campaignType,
+		Type:      CampaignTypeReferral,
 		ExpiresAt: Expiry(),
 	}
 }
@@ -41,6 +36,11 @@ func (self Campaign) ToDomain() domain.Campaign {
 		UpdatedAt: self.UpdatedAt.ToDomain(),
 		ExpiresAt: self.ExpiresAt.ToDomain(),
 	}
+}
+
+// IsExpired returns true when a campaign has expired.
+func (self Campaign) IsExpired() bool {
+	return self.ExpiresAt <= Now()
 }
 
 // CampaignType categorizes campaigns

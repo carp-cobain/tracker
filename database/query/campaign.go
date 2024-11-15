@@ -8,7 +8,7 @@ import (
 // SelectCampaign selects a campaign by id
 func SelectCampaign(db *gorm.DB, campaignID string) (campaign model.Campaign, err error) {
 	if err = db.Where("id = ?", campaignID).First(&campaign).Error; err == nil {
-		if campaign.ExpiresAt <= model.Now() {
+		if campaign.IsExpired() {
 			err = ErrCampaignExpired
 		}
 	}

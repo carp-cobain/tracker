@@ -37,9 +37,9 @@ func (self CampaignRepo) GetCampaigns(
 	var nextCursor uint64
 	results := query.SelectCampaigns(self.readDB, account.String(), pageParams.Cursor, pageParams.Limit)
 	campaigns := make([]domain.Campaign, len(results))
-	for i, result := range results {
-		campaigns[i] = result.ToDomain()
-		nextCursor = max(nextCursor, uint64(result.CreatedAt))
+	for i, r := range results {
+		campaigns[i] = r.ToDomain()
+		nextCursor = max(nextCursor, uint64(r.CreatedAt))
 	}
 	return domain.NewPage(nextCursor, pageParams.Limit, campaigns)
 }

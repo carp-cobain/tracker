@@ -28,9 +28,9 @@ func (self ReferralRepo) GetReferrals(
 	var nextCursor uint64
 	results := query.SelectReferrals(self.readDB, campaignID.String(), pageParams.Cursor, pageParams.Limit)
 	referrals := make([]domain.Referral, len(results))
-	for i, result := range results {
-		referrals[i] = result.ToDomain()
-		nextCursor = max(nextCursor, uint64(result.CreatedAt))
+	for i, r := range results {
+		referrals[i] = r.ToDomain()
+		nextCursor = max(nextCursor, uint64(r.CreatedAt))
 	}
 	return domain.NewPage(nextCursor, pageParams.Limit, referrals)
 }
@@ -40,12 +40,11 @@ func (self ReferralRepo) GetReferralsWithStatus(
 	status domain.ReferralStatus, pageParams domain.PageParams) domain.Page[domain.Referral] {
 
 	var nextCursor uint64
-	cursor, limit := pageParams.Cursor, pageParams.Limit
-	results := query.SelectReferralsWithStatus(self.readDB, status, cursor, limit)
+	results := query.SelectReferralsWithStatus(self.readDB, status, pageParams.Cursor, pageParams.Limit)
 	referrals := make([]domain.Referral, len(results))
-	for i, result := range results {
-		referrals[i] = result.ToDomain()
-		nextCursor = max(nextCursor, uint64(result.CreatedAt))
+	for i, r := range results {
+		referrals[i] = r.ToDomain()
+		nextCursor = max(nextCursor, uint64(r.CreatedAt))
 	}
 	return domain.NewPage(nextCursor, pageParams.Limit, referrals)
 }

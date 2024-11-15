@@ -2,9 +2,9 @@ package repo_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/carp-cobain/tracker/database"
-	"github.com/carp-cobain/tracker/database/model"
 	"github.com/carp-cobain/tracker/database/repo"
 	"github.com/carp-cobain/tracker/domain"
 
@@ -25,7 +25,7 @@ func createTestDB(t *testing.T) *gorm.DB {
 func TestCampaignRepo(t *testing.T) {
 	// Setup
 	db := createTestDB(t)
-	account := domain.NewAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz2")
+	account := domain.MustValidateAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz2")
 	campaignRepo := repo.NewCampaignRepo(db, db)
 
 	// Create
@@ -33,16 +33,22 @@ func TestCampaignRepo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create campaign: %+v", err)
 	}
-	if campaign.Type != "referral" {
+	if campaign.Type != domain.ReferralType {
 		t.Fatalf("expected campaign type: referral, got: %s", campaign.Type)
+	}
+
+	// Update
+	updatedName := "My Updated Campaign"
+	expiresAt := campaign.ExpiresAt.Add(30 * 24 * time.Hour)
+	if _, err := campaignRepo.UpdateCampaign(campaign.ID, updatedName, expiresAt); err != nil {
+		t.Fatalf("failed to update campaign: %+v", err)
 	}
 
 	// Read
 	if _, err := campaignRepo.GetCampaign(campaign.ID); err != nil {
 		t.Fatalf("failed to get campaign: %+v", err)
 	}
-	params := domain.NewPageParams(0, 10)
-	if page := campaignRepo.GetCampaigns(account, params); len(page.Data) != 1 {
+	if page := campaignRepo.GetCampaigns(account, domain.DefaultPageParams()); page.Size != 1 {
 		t.Fatalf("got unexpected number of campaigns")
 	}
 }
@@ -50,37 +56,41 @@ func TestCampaignRepo(t *testing.T) {
 func TestReferralRepo(t *testing.T) {
 	// Setup
 	db := createTestDB(t)
-	campgaignRepo := repo.NewCampaignRepo(db, db)
 	referralRepo := repo.NewReferralRepo(db, db)
 
 	// Base campaign
-	referer := domain.NewAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz3")
-	campaign, err := campgaignRepo.CreateCampaign(referer, "Referral Unit Testing")
+	referer := domain.MustValidateAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz3")
+	campaign, err := repo.NewCampaignRepo(db, db).CreateCampaign(referer, "Referral Unit Testing")
 	if err != nil {
-		t.Fatalf("failed to create referral campaign: %+v", err)
+		t.Fatalf("failed to create campaign: %+v", err)
 	}
 
 	// Create
-	referee := domain.NewAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz4")
+	referee := domain.MustValidateAccount("tp1mrzpjszjs6dc5e8fwy23trnz775rwqvhpzzzz4")
 	referral, err := referralRepo.CreateReferral(campaign.ID, referee)
 	if err != nil {
 		t.Fatalf("failed to create referral: %+v", err)
 	}
 
 	// Read
-	params := domain.NewPageParams(0, 10)
-	if page := referralRepo.GetReferrals(campaign.ID, params); len(page.Data) != 1 {
+	pageParams := domain.DefaultPageParams()
+	if page := referralRepo.GetReferrals(campaign.ID, pageParams); page.Size != 1 {
 		t.Fatalf("got unexpected number of referrals for campaign")
+	}
+	if page := referralRepo.GetReferralsWithStatus(domain.PendingStatus, pageParams); page.Size != 1 {
+		t.Fatalf("got unexpected number of pending referrals")
 	}
 
 	// Update (set status)
-	verified := model.ReferralStatusVerified.ToDomain()
-	updated, err := referralRepo.UpdateReferral(referral.ID, verified)
+	updated, err := referralRepo.UpdateReferral(referral.ID, domain.VerifiedStatus)
 	if err != nil {
 		t.Fatalf("failed to update referral status: %+v", err)
 	}
-	if updated.Status != verified {
+	if updated.Status != domain.VerifiedStatus {
 		t.Fatalf("expected verified status, got: %s", updated.Status)
+	}
+	if page := referralRepo.GetReferralsWithStatus(domain.VerifiedStatus, pageParams); page.Size != 1 {
+		t.Fatalf("got unexpected number of verified referrals")
 	}
 
 	// Error check: ensure accounts can't add referrals for thier own campaigns.
